@@ -32,6 +32,12 @@ class ConditionalAvailabilityGroupKeyPlugin extends AbstractPlugin implements It
      */
     protected function buildGroupKey(ItemTransfer $cartItem)
     {
-        return $cartItem->getSku() . static::GROUP_KEY_DELIMITER . $cartItem->getDeliveryTime();
+        $deliveryTime = $cartItem->getDeliveryTime();
+
+        if (empty($deliveryTime)) {
+            return $cartItem->getSku();
+        }
+
+        return $cartItem->getSku() . static::GROUP_KEY_DELIMITER . $deliveryTime;
     }
 }

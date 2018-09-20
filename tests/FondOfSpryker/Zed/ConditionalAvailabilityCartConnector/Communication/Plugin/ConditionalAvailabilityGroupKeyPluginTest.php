@@ -35,6 +35,24 @@ class ConditionalAvailabilityGroupKeyPluginTest extends Unit
     /**
      * @return void
      */
+    public function testExpandItemMustSetGroupKeyToSkuOfGivenProductWhenNoDeliveryDateIsSet()
+    {
+        $itemTransfer = new ItemTransfer();
+        $itemTransfer->setSku(self::SKU);
+        $itemTransfer->setDeliveryTime("");
+
+        $changeTransfer = new CartChangeTransfer();
+        $changeTransfer->addItem($itemTransfer);
+
+        $plugin = new ConditionalAvailabilityGroupKeyPlugin();
+        $plugin->expandItems($changeTransfer);
+
+        $this->assertSame(self::SKU, $changeTransfer->getItems()[0]->getGroupKey());
+    }
+
+    /**
+     * @return void
+     */
     public function testExpandItemMustNotChangeGroupKeyWhenGroupKeyIsSet()
     {
         $itemTransfer = new ItemTransfer();
