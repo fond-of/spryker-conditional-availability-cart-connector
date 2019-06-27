@@ -3,6 +3,7 @@
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model;
 
 use DateTime;
+use ArrayObject;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
 use Generated\Shared\Transfer\ItemTransfer;
@@ -59,6 +60,8 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     protected function expandItem(ItemTransfer $itemTransfer): ItemTransfer
     {
+        $itemTransfer->setMessages(new ArrayObject());
+
         $sku = $itemTransfer->getSku();
         $deliveryDate = $this->getConcreteDeliveryTime($itemTransfer);
 
