@@ -3,7 +3,6 @@
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model;
 
 use DateTime;
-use ArrayObject;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
 use Generated\Shared\Transfer\ItemTransfer;
@@ -15,6 +14,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     protected const MESSAGE_TYPE_ERROR = 'error';
 
     protected const MESSAGE_NOT_AVAILABLE_FOR_GIVEN_DELIVERY_DATE = 'conditional_availability_cart_connector.not_available_for_given_delivery_date';
+    protected const MESSAGE_NOT_AVAILABLE_FOR_EARLIEST_DELIVERY_DATE = 'conditional_availability_cart_connector.not_available_for_earliest_delivery_date';
     protected const MESSAGE_NOT_AVAILABLE_FOR_GIVEN_QTY = 'conditional_availability_cart_connector.not_available_for_given_qty';
 
     /**
@@ -60,13 +60,59 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     protected function expandItem(ItemTransfer $itemTransfer): ItemTransfer
     {
-        $itemTransfer->setMessages(new ArrayObject());
+        if ($itemTransfer->getDeliveryTime() === 'earliest-date') {
+            return $this->expandItemWithEarliestDeliveryDate($itemTransfer);
+        }
 
-        $sku = $itemTransfer->getSku();
-        $deliveryDate = $this->getConcreteDeliveryTime($itemTransfer);
+        return $this->expandItemWithConcreteDeliveryDate($itemTransfer);
+    }
 
-        $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($sku, [
-            'date' => $deliveryDate,
+    /**
+     * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
+     *
+     * @return \Generated\Shared\Transfer\ItemTransfer
+     */
+    protected function expandItemWithEarliestDeliveryDate(ItemTransfer $itemTransfer): ItemTransfer
+    {
+        $earliestDeliveryDate = $this->conditionalAvailabilityService->generateEarliestDeliveryDate();
+
+        $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
+            'start_at' => $earliestDeliveryDate,
+            'warehouse' => 'EU',
+        ]);
+
+        if ($resultSet->count() === 0) {
+            $itemTransfer->addMessage($this->createNotAvailableForEarliestDeliveryDateMessage());
+
+            return $itemTransfer;
+        }
+
+        foreach ($resultSet->getResults() as $result) {
+            $data = $result->getData();
+            $dataQuantityInt = (int)$data['qty'];
+
+            if ($dataQuantityInt < $itemTransfer->getQuantity()) {
+                $itemTransfer->addMessage($this->createNotAvailableForGivenQytMessage());
+            }
+        }
+
+        return $itemTransfer;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
+     *
+     * @throws
+     *
+     * @return \Generated\Shared\Transfer\ItemTransfer
+     */
+    protected function expandItemWithConcreteDeliveryDate(ItemTransfer $itemTransfer): ItemTransfer
+    {
+        $concreteDeliveryDate = new DateTime($itemTransfer->getDeliveryTime());
+
+        $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
+            'start_at' => $concreteDeliveryDate,
+            'end_at' => $concreteDeliveryDate,
             'warehouse' => 'EU',
         ]);
 
@@ -89,24 +135,6 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     }
 
     /**
-     * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
-     *
-     * @throws
-     *
-     * @return \DateTime
-     */
-    protected function getConcreteDeliveryTime(ItemTransfer $itemTransfer): DateTime
-    {
-        $deliveryTime = $itemTransfer->getDeliveryTime();
-
-        if ($deliveryTime === 'earliest-date') {
-            return $this->conditionalAvailabilityService->generateEarliestDeliveryDate();
-        }
-
-        return new DateTime($deliveryTime);
-    }
-
-    /**
      * @return \Generated\Shared\Transfer\MessageTransfer
      */
     protected function createNotAvailableForGivenDeliveryDateMessage(): MessageTransfer
@@ -115,6 +143,19 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
 
         $messageTransfer->setType(static::MESSAGE_TYPE_ERROR)
             ->setValue(static::MESSAGE_NOT_AVAILABLE_FOR_GIVEN_DELIVERY_DATE);
+
+        return $messageTransfer;
+    }
+
+    /**
+     * @return \Generated\Shared\Transfer\MessageTransfer
+     */
+    protected function createNotAvailableForEarliestDeliveryDateMessage(): MessageTransfer
+    {
+        $messageTransfer = new MessageTransfer();
+
+        $messageTransfer->setType(static::MESSAGE_TYPE_ERROR)
+            ->setValue(static::MESSAGE_NOT_AVAILABLE_FOR_EARLIEST_DELIVERY_DATE);
 
         return $messageTransfer;
     }
