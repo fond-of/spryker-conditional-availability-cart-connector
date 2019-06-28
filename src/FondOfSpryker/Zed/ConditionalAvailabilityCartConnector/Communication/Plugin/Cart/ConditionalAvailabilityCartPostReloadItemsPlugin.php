@@ -18,6 +18,6 @@ class ConditionalAvailabilityCartPostReloadItemsPlugin extends AbstractPlugin im
      */
     public function postReloadItems(QuoteTransfer $quoteTransfer): QuoteTransfer
     {
-        return $this->getFacade()->expandQuote($quoteTransfer);
+        return $this->getFacade()->expandQuoteAfterReloadItems($quoteTransfer);
     }
 }

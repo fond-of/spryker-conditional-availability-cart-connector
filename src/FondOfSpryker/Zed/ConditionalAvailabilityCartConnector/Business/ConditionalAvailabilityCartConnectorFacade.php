@@ -17,7 +17,7 @@ class ConditionalAvailabilityCartConnectorFacade extends AbstractFacade implemen
      *
      * @return \Generated\Shared\Transfer\QuoteTransfer
      */
-    public function expandQuote(QuoteTransfer $quoteTransfer): QuoteTransfer
+    public function expandQuoteAfterReloadItems(QuoteTransfer $quoteTransfer): QuoteTransfer
     {
         return $this->getFactory()
             ->createConditionalAvailabilityExpander()
