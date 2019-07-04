@@ -77,7 +77,6 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     protected function expandItem(ItemTransfer $itemTransfer): ItemTransfer
     {
-        $itemTransfer->setValidationMessages(new \ArrayObject()); // TODO remove and new plugin
         if ($itemTransfer->getDeliveryTime() === ConditionalAvailabilityConstants::KEY_EARLIEST_DATE) {
             return $this->expandItemWithEarliestDeliveryDate($itemTransfer);
         }
