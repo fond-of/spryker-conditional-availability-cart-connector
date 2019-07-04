@@ -4,5 +4,21 @@
            xsi:schemaLocation="spryker:transfer-01 http://static.spryker.com/transfer-01.xsd">
     <transfer name="Item">
         <property name="deliveryTime" type="string" />
+        <property name="deliveryDate" type="string"/>
+        <property name="concreteDeliveryDate" type="string"/>
+        <property name="validationMessages" type="Message[]" singular="validationMessage"/>
+    </transfer>
+
+    <transfer name="RestCartItemsAttributes">
+        <property name="deliveryTime" type="string" />
+    </transfer>
+
+    <transfer name="RestCartItem">
+        <property name="deliveryTime" type="string" />
+    </transfer>
+
+    <transfer name="Quote">
+        <property name="deliveryDates" type="array" singular="deliveryDate"/>
+        <property name="concreteDeliveryDates" type="array" singular="concreteDeliveryDate"/>
     </transfer>
 </transfers>

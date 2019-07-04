@@ -3,15 +3,19 @@
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model;
 
 use DateTime;
+use FondOfSpryker\Shared\ConditionalAvailability\ConditionalAvailabilityConstants;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
 use Generated\Shared\Transfer\ItemTransfer;
 use Generated\Shared\Transfer\MessageTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
 
+use function array_unique;
+
 class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpanderInterface
 {
     protected const MESSAGE_TYPE_ERROR = 'error';
+    protected const DELIVERY_DATE_FORMAT = 'Y-m-d';
 
     protected const MESSAGE_NOT_AVAILABLE_FOR_GIVEN_DELIVERY_DATE = 'conditional_availability_cart_connector.not_available_for_given_delivery_date';
     protected const MESSAGE_NOT_AVAILABLE_FOR_EARLIEST_DELIVERY_DATE = 'conditional_availability_cart_connector.not_available_for_earliest_delivery_date';
@@ -26,6 +30,16 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
      */
     protected $conditionalAvailabilityService;
+
+    /**
+     * @var string[]
+     */
+    private $deliveryDates = [];
+
+    /**
+     * @var string[]
+     */
+    private $concreteDeliveryDates = [];
 
     /**
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface $conditionalAvailabilityClient
@@ -50,6 +64,9 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
             $this->expandItem($itemTransfer);
         }
 
+        $quoteTransfer->setDeliveryDates(array_unique($this->deliveryDates));
+        $quoteTransfer->setConcreteDeliveryDates(array_unique($this->concreteDeliveryDates));
+
         return $quoteTransfer;
     }
 
@@ -60,7 +77,8 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     protected function expandItem(ItemTransfer $itemTransfer): ItemTransfer
     {
-        if ($itemTransfer->getDeliveryTime() === 'earliest-date') {
+        $itemTransfer->setValidationMessages(new \ArrayObject()); // TODO remove and new plugin
+        if ($itemTransfer->getDeliveryTime() === ConditionalAvailabilityConstants::KEY_EARLIEST_DATE) {
             return $this->expandItemWithEarliestDeliveryDate($itemTransfer);
         }
 
@@ -77,23 +95,31 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $earliestDeliveryDate = $this->conditionalAvailabilityService->generateEarliestDeliveryDate();
 
         $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
-            'start_at' => $earliestDeliveryDate,
-            'warehouse' => 'EU',
+            ConditionalAvailabilityConstants::PARAMETER_START_AT => $earliestDeliveryDate,
+            ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
         ]);
 
         if ($resultSet->count() === 0) {
-            $itemTransfer->addMessage($this->createNotAvailableForEarliestDeliveryDateMessage());
-
-            return $itemTransfer;
+            return $itemTransfer->addValidationMessage($this->createNotAvailableForEarliestDeliveryDateMessage());
         }
 
         foreach ($resultSet->getResults() as $result) {
             $data = $result->getData();
-            $dataQuantityInt = (int)$data['qty'];
+            $dataQuantityInt = (int) $data['qty'];
+            $dataStartAt = $data['startAt'];
 
             if ($dataQuantityInt < $itemTransfer->getQuantity()) {
-                $itemTransfer->addMessage($this->createNotAvailableForGivenQytMessage());
+                $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
             }
+
+            $itemTransfer->setDeliveryDate(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE);
+            $startAtString = (new DateTime($dataStartAt))->format(static::DELIVERY_DATE_FORMAT);
+            $itemTransfer->setConcreteDeliveryDate($startAtString);
+
+            $this->deliveryDates[] = ConditionalAvailabilityConstants::KEY_EARLIEST_DATE;
+            $this->concreteDeliveryDates[] = $startAtString;
+
+            break;
         }
 
         return $itemTransfer;
@@ -111,24 +137,36 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $concreteDeliveryDate = new DateTime($itemTransfer->getDeliveryTime());
 
         $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
-            'start_at' => $concreteDeliveryDate,
-            'end_at' => $concreteDeliveryDate,
-            'warehouse' => 'EU',
+            ConditionalAvailabilityConstants::PARAMETER_START_AT => $concreteDeliveryDate,
+            ConditionalAvailabilityConstants::PARAMETER_END_AT => $concreteDeliveryDate,
+            ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
         ]);
 
         if ($resultSet->count() === 0) {
-            $itemTransfer->addMessage($this->createNotAvailableForGivenDeliveryDateMessage());
-
-            return $itemTransfer;
+            return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenDeliveryDateMessage());
         }
 
         foreach ($resultSet->getResults() as $result) {
             $data = $result->getData();
-            $dataQuantityInt = (int)$data['qty'];
+            $dataQuantityInt = (int) $data['qty'];
+            $dataStartAt = $data['startAt'];
+
+            $startAtDateTime = new DateTime($dataStartAt);
+            if ($startAtDateTime < $concreteDeliveryDate) {
+                continue;
+            }
 
             if ($dataQuantityInt < $itemTransfer->getQuantity()) {
-                $itemTransfer->addMessage($this->createNotAvailableForGivenQytMessage());
+                $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
             }
+
+            $itemTransfer->setDeliveryDate($itemTransfer->getDeliveryTime());
+
+            $startAtString = $startAtDateTime->format(static::DELIVERY_DATE_FORMAT);
+            $itemTransfer->setConcreteDeliveryDate($startAtString);
+
+            $this->deliveryDates[] = $startAtString;
+            $this->concreteDeliveryDates[] = $startAtString;
         }
 
         return $itemTransfer;

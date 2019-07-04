@@ -6,6 +6,8 @@ namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business;
 
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityExpander;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityExpanderInterface;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpander;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpanderInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorDependencyProvider;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
@@ -26,6 +28,14 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
             $this->getConditionalAvailabilityClient(),
             $this->getConditionalAvailabilityService()
         );
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpanderInterface
+     */
+    public function createConditionalAvailabilityItemExpander(): ConditionalAvailabilityItemExpanderInterface
+    {
+        return new ConditionalAvailabilityItemExpander();
     }
 
     /**

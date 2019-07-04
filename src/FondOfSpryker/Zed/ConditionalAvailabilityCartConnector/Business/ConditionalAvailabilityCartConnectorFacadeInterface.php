@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business;
 
+use Generated\Shared\Transfer\CartChangeTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
 
 interface ConditionalAvailabilityCartConnectorFacadeInterface
@@ -14,4 +15,11 @@ interface ConditionalAvailabilityCartConnectorFacadeInterface
      * @return \Generated\Shared\Transfer\QuoteTransfer
      */
     public function expandQuoteAfterReloadItems(QuoteTransfer $quoteTransfer): QuoteTransfer;
+
+    /**
+     * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
+     *
+     * @return \Generated\Shared\Transfer\CartChangeTransfer
+     */
+    public function expandChangedCartItems(CartChangeTransfer $cartChangeTransfer): CartChangeTransfer;
 }
