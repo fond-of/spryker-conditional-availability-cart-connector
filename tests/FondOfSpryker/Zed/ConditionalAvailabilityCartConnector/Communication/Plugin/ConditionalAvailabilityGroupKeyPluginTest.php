@@ -5,7 +5,7 @@ namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\P
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\CartChangeTransfer;
 use Generated\Shared\Transfer\ItemTransfer;
-use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\Plugin\ConditionalAvailabilityGroupKeyPlugin;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\Plugin\Cart\ConditionalAvailabilityGroupKeyPlugin;
 
 class ConditionalAvailabilityGroupKeyPluginTest extends Unit
 {

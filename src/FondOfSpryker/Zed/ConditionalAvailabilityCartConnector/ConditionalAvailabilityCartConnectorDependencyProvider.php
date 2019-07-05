@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector;
 
-use FondOfSpryker\Service\ConditionalAvailability\ConditionalAvailabilityService;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClient;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
 use Spryker\Zed\Kernel\Container;
@@ -53,9 +52,9 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
      */
     protected function addConditionalAvailabilityService(Container $container): Container
     {
-        $container[static::CONDITIONAL_AVAILABILITY_SERVICE] = static function () {
+        $container[static::CONDITIONAL_AVAILABILITY_SERVICE] = static function (Container $container) {
             return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityService(
-                new ConditionalAvailabilityService()
+                $container->getLocator()->conditionalAvailability()->service()
             );
         };
 
