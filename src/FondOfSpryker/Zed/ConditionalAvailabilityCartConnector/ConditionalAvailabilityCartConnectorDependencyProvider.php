@@ -11,8 +11,9 @@ use Spryker\Zed\Search\SearchDependencyProvider;
 
 class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDependencyProvider
 {
-    public const CONDITIONAL_AVAILABILITY_CLIENT = 'CONDITIONAL_AVAILABILITY_CLIENT';
-    public const CONDITIONAL_AVAILABILITY_SERVICE = 'CONDITIONAL_AVAILABILITY_SERVICE';
+    public const CLIENT_CONDITIONAL_AVAILABILITY = 'CLIENT_CONDITIONAL_AVAILABILITY';
+    public const SERVICE_CONDITIONAL_AVAILABILITY = 'SERVICE_CONDITIONAL_AVAILABILITY';
+    public const SERVICE = 'SERVICE';
 
     /**
      * @param \Spryker\Zed\Kernel\Container $container
@@ -25,6 +26,7 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
 
         $container = $this->addConditionalAvailabilityClient($container);
         $container = $this->addConditionalAvailabilityService($container);
+        $container = $this->addService($container);
 
         return $container;
     }
@@ -36,7 +38,7 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
      */
     protected function addConditionalAvailabilityClient(Container $container): Container
     {
-        $container[static::CONDITIONAL_AVAILABILITY_CLIENT] = static function (Container $container) {
+        $container[static::CLIENT_CONDITIONAL_AVAILABILITY] = static function (Container $container) {
             return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityClient(
                 $container->getLocator()->conditionalAvailability()->client()
             );
@@ -52,10 +54,24 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
      */
     protected function addConditionalAvailabilityService(Container $container): Container
     {
-        $container[static::CONDITIONAL_AVAILABILITY_SERVICE] = static function (Container $container) {
+        $container[static::SERVICE_CONDITIONAL_AVAILABILITY] = static function (Container $container) {
             return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityService(
                 $container->getLocator()->conditionalAvailability()->service()
             );
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addService(Container $container): Container
+    {
+        $container[static::SERVICE] = static function (Container $container) {
+            return $container->getLocator()->conditionalAvailabilityCartConnector()->service();
         };
 
         return $container;

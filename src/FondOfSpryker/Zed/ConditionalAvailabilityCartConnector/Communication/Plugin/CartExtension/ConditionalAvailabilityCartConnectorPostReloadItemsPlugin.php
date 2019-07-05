@@ -11,7 +11,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
  * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorConfig getConfig()
  * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\ConditionalAvailabilityCartConnectorCommunicationFactory getFactory()
  */
-class ConditionalAvailabilityCartPostReloadItemsPlugin extends AbstractPlugin implements PostReloadItemsPluginInterface
+class ConditionalAvailabilityCartConnectorPostReloadItemsPlugin extends AbstractPlugin implements PostReloadItemsPluginInterface
 {
     /**
      * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer

@@ -11,5 +11,5 @@ interface ConditionalAvailabilityItemExpanderInterface
      *
      * @return \Generated\Shared\Transfer\CartChangeTransfer
      */
-    public function expandItems(CartChangeTransfer $cartChangeTransfer): CartChangeTransfer;
+    public function expand(CartChangeTransfer $cartChangeTransfer): CartChangeTransfer;
 }

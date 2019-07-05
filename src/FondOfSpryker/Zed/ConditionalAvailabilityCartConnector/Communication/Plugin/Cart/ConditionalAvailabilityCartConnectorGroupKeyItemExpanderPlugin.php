@@ -8,8 +8,10 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
  * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\ConditionalAvailabilityCartConnectorFacadeInterface getFacade()
+ * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorConfig getConfig()
+ * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\ConditionalAvailabilityCartConnectorCommunicationFactory getFactory()
  */
-class ConditionalAvailabilityCartGroupKeyItemExpanderPlugin extends AbstractPlugin implements ItemExpanderPluginInterface
+class ConditionalAvailabilityCartConnectorGroupKeyItemExpanderPlugin extends AbstractPlugin implements ItemExpanderPluginInterface
 {
     /**
      * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
@@ -18,7 +20,6 @@ class ConditionalAvailabilityCartGroupKeyItemExpanderPlugin extends AbstractPlug
      */
     public function expandItems(CartChangeTransfer $cartChangeTransfer): CartChangeTransfer
     {
-        return $this->getFacade()
-            ->expandChangedCartItems($cartChangeTransfer);
+        return $this->getFacade()->expandChangedCartItems($cartChangeTransfer);
     }
 }

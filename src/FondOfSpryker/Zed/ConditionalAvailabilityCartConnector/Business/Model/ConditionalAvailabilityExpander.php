@@ -9,7 +9,6 @@ use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\Co
 use Generated\Shared\Transfer\ItemTransfer;
 use Generated\Shared\Transfer\MessageTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
-
 use function array_unique;
 
 class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpanderInterface
@@ -87,6 +86,8 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     /**
      * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
      *
+     * @throws
+     *
      * @return \Generated\Shared\Transfer\ItemTransfer
      */
     protected function expandItemWithEarliestDeliveryDate(ItemTransfer $itemTransfer): ItemTransfer
@@ -104,7 +105,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
 
         foreach ($resultSet->getResults() as $result) {
             $data = $result->getData();
-            $dataQuantityInt = (int) $data['qty'];
+            $dataQuantityInt = (int)$data['qty'];
             $dataStartAt = $data['startAt'];
 
             if ($dataQuantityInt < $itemTransfer->getQuantity()) {
@@ -147,7 +148,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
 
         foreach ($resultSet->getResults() as $result) {
             $data = $result->getData();
-            $dataQuantityInt = (int) $data['qty'];
+            $dataQuantityInt = (int)$data['qty'];
             $dataStartAt = $data['startAt'];
 
             $startAtDateTime = new DateTime($dataStartAt);

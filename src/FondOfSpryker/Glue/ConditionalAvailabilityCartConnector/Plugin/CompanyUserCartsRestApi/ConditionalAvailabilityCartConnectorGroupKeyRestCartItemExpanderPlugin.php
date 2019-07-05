@@ -9,7 +9,7 @@ use Spryker\Glue\Kernel\AbstractPlugin;
 /**
  * @method \FondOfSpryker\Glue\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorFactory getFactory()
  */
-class ConditionalAvailabilityGroupKeyPlugin extends AbstractPlugin implements RestCartItemExpanderPluginInterface
+class ConditionalAvailabilityCartConnectorGroupKeyRestCartItemExpanderPlugin extends AbstractPlugin implements RestCartItemExpanderPluginInterface
 {
     /**
      * {@inheritdoc}

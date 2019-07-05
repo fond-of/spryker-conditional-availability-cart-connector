@@ -34,6 +34,6 @@ class ConditionalAvailabilityCartConnectorFacade extends AbstractFacade implemen
     {
         return $this->getFactory()
             ->createConditionalAvailabilityItemExpander()
-            ->expandItems($cartChangeTransfer);
+            ->expand($cartChangeTransfer);
     }
 }
