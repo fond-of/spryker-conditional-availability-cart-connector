@@ -13,8 +13,7 @@
     }
   ],
   "require": {
-    "php": ">=7.1",
-    "spryker/cart": ""
+    "php": ">=7.1"
   },
   "require-dev": {
     "spryker/code-sniffer": "^0.12",
