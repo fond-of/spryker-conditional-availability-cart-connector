@@ -5,9 +5,9 @@ namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\P
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\CartChangeTransfer;
 use Generated\Shared\Transfer\ItemTransfer;
-use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\Plugin\Cart\ConditionalAvailabilityGroupKeyPlugin;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Communication\Plugin\ConditionalAvailabilityGroupKeyPlugin;
 
-class ConditionalAvailabilityGroupKeyPluginTest extends Unit
+class ConditionalAvailabilityCartGroupKeyItemExpanderPluginTest extends Unit
 {
     const SKU = 'sku';
     const DELIVERY_TIME = '27.10.2018';
@@ -26,7 +26,7 @@ class ConditionalAvailabilityGroupKeyPluginTest extends Unit
         $changeTransfer = new CartChangeTransfer();
         $changeTransfer->addItem($itemTransfer);
 
-        $plugin = new ConditionalAvailabilityGroupKeyPlugin();
+        $plugin = new ConditionalAvailabilityCartGroupKeyItemExpanderPlugin();
         $plugin->expandItems($changeTransfer);
 
         $this->assertSame(self::RESULTING_GROUP_KEY, $changeTransfer->getItems()[0]->getGroupKey());
@@ -44,7 +44,7 @@ class ConditionalAvailabilityGroupKeyPluginTest extends Unit
         $changeTransfer = new CartChangeTransfer();
         $changeTransfer->addItem($itemTransfer);
 
-        $plugin = new ConditionalAvailabilityGroupKeyPlugin();
+        $plugin = new ConditionalAvailabilityCartGroupKeyItemExpanderPlugin();
         $plugin->expandItems($changeTransfer);
 
         $this->assertSame(self::SKU, $changeTransfer->getItems()[0]->getGroupKey());
@@ -63,7 +63,7 @@ class ConditionalAvailabilityGroupKeyPluginTest extends Unit
         $changeTransfer = new CartChangeTransfer();
         $changeTransfer->addItem($itemTransfer);
 
-        $plugin = new ConditionalAvailabilityGroupKeyPlugin();
+        $plugin = new ConditionalAvailabilityCartGroupKeyItemExpanderPlugin();
         $plugin->expandItems($changeTransfer);
 
         $this->assertSame(self::RESULTING_GROUP_KEY, $changeTransfer->getItems()[0]->getGroupKey());

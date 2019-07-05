@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business;
 
+use Generated\Shared\Transfer\CartChangeTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
 use Spryker\Zed\Kernel\Business\AbstractFacade;
 
@@ -22,5 +23,17 @@ class ConditionalAvailabilityCartConnectorFacade extends AbstractFacade implemen
         return $this->getFactory()
             ->createConditionalAvailabilityExpander()
             ->expand($quoteTransfer);
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
+     *
+     * @return \Generated\Shared\Transfer\CartChangeTransfer
+     */
+    public function expandChangedCartItems(CartChangeTransfer $cartChangeTransfer): CartChangeTransfer
+    {
+        return $this->getFactory()
+            ->createConditionalAvailabilityItemExpander()
+            ->expandItems($cartChangeTransfer);
     }
 }
