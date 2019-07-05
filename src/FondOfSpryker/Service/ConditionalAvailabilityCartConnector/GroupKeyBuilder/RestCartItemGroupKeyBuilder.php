@@ -26,7 +26,7 @@ class RestCartItemGroupKeyBuilder implements RestCartItemGroupKeyBuilderInterfac
      */
     public function build(RestCartItemTransfer $restCartItemTransfer): string
     {
-        $deliveryDate = $restCartItemTransfer->getDeliveryTime();
+        $deliveryDate = $restCartItemTransfer->getDeliveryDate();
         $sku = $restCartItemTransfer->getSku();
 
         if ($deliveryDate === null) {

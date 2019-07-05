@@ -26,7 +26,7 @@ class ItemGroupKeyBuilder implements ItemGroupKeyBuilderInterface
      */
     public function build(ItemTransfer $itemTransfer): string
     {
-        $deliveryDate = $itemTransfer->getDeliveryTime();
+        $deliveryDate = $itemTransfer->getDeliveryDate();
         $sku = $itemTransfer->getSku();
 
         if ($deliveryDate === null) {

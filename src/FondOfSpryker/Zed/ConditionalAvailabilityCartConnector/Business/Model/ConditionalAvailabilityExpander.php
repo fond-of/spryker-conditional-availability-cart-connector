@@ -76,7 +76,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     protected function expandItem(ItemTransfer $itemTransfer): ItemTransfer
     {
-        if ($itemTransfer->getDeliveryTime() === ConditionalAvailabilityConstants::KEY_EARLIEST_DATE) {
+        if ($itemTransfer->getDeliveryDate() === ConditionalAvailabilityConstants::KEY_EARLIEST_DATE) {
             return $this->expandItemWithEarliestDeliveryDate($itemTransfer);
         }
 
@@ -134,7 +134,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     protected function expandItemWithConcreteDeliveryDate(ItemTransfer $itemTransfer): ItemTransfer
     {
-        $concreteDeliveryDate = new DateTime($itemTransfer->getDeliveryTime());
+        $concreteDeliveryDate = new DateTime($itemTransfer->getDeliveryDate());
 
         $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
             ConditionalAvailabilityConstants::PARAMETER_START_AT => $concreteDeliveryDate,
@@ -160,7 +160,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
                 $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
             }
 
-            $itemTransfer->setDeliveryDate($itemTransfer->getDeliveryTime());
+            $itemTransfer->setDeliveryDate($itemTransfer->getDeliveryDate());
 
             $startAtString = $startAtDateTime->format(static::DELIVERY_DATE_FORMAT);
             $itemTransfer->setConcreteDeliveryDate($startAtString);
