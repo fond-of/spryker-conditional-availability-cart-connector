@@ -63,8 +63,11 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
             $this->expandItem($itemTransfer);
         }
 
-        $quoteTransfer->setDeliveryDates(array_unique($this->deliveryDates));
-        $quoteTransfer->setConcreteDeliveryDates(array_unique($this->concreteDeliveryDates));
+        $deliveryDates =
+
+
+        $quoteTransfer->setDeliveryDates($this->createUniqueDates($this->deliveryDates))
+            ->setConcreteDeliveryDates($this->createUniqueDates($this->concreteDeliveryDates));
 
         return $quoteTransfer;
     }
@@ -134,11 +137,12 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     protected function expandItemWithConcreteDeliveryDate(ItemTransfer $itemTransfer): ItemTransfer
     {
-        $concreteDeliveryDate = new DateTime($itemTransfer->getDeliveryDate());
+        $concreteDeliveryDate = $itemTransfer->getDeliveryDate();
+        $startAndEndAt = new DateTime($concreteDeliveryDate);
 
         $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
-            ConditionalAvailabilityConstants::PARAMETER_START_AT => $concreteDeliveryDate,
-            ConditionalAvailabilityConstants::PARAMETER_END_AT => $concreteDeliveryDate,
+            ConditionalAvailabilityConstants::PARAMETER_START_AT => $startAndEndAt,
+            ConditionalAvailabilityConstants::PARAMETER_END_AT => $startAndEndAt,
             ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
         ]);
 
@@ -149,24 +153,16 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         foreach ($resultSet->getResults() as $result) {
             $data = $result->getData();
             $dataQuantityInt = (int)$data['qty'];
-            $dataStartAt = $data['startAt'];
-
-            $startAtDateTime = new DateTime($dataStartAt);
-            if ($startAtDateTime < $concreteDeliveryDate) {
-                continue;
-            }
 
             if ($dataQuantityInt < $itemTransfer->getQuantity()) {
                 $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
             }
 
-            $itemTransfer->setDeliveryDate($itemTransfer->getDeliveryDate());
+            $itemTransfer->setDeliveryDate($concreteDeliveryDate)
+                ->setConcreteDeliveryDate($concreteDeliveryDate);
 
-            $startAtString = $startAtDateTime->format(static::DELIVERY_DATE_FORMAT);
-            $itemTransfer->setConcreteDeliveryDate($startAtString);
-
-            $this->deliveryDates[] = $startAtString;
-            $this->concreteDeliveryDates[] = $startAtString;
+            $this->deliveryDates[] = $concreteDeliveryDate;
+            $this->concreteDeliveryDates[] = $concreteDeliveryDate;
         }
 
         return $itemTransfer;
@@ -209,5 +205,15 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
             ->setValue(static::MESSAGE_NOT_AVAILABLE_FOR_GIVEN_QTY);
 
         return $messageTransfer;
+    }
+
+    /**
+     * @param array $dates
+     *
+     * @return array
+     */
+    protected function createUniqueDates(array $dates): array
+    {
+        return array_values(array_unique($dates));
     }
 }
