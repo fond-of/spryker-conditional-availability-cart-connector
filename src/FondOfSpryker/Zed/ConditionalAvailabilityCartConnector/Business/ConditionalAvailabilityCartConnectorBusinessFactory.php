@@ -5,6 +5,8 @@ declare(strict_types = 1);
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business;
 
 use FondOfSpryker\Service\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorServiceInterface;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityDeliveryDateCleaner;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityDeliveryDateCleanerInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityExpander;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityExpanderInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpander;
@@ -29,6 +31,14 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
             $this->getConditionalAvailabilityClient(),
             $this->getConditionalAvailabilityService()
         );
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityDeliveryDateCleaner
+     */
+    public function createConditionalAvailabilityDeliveryDateCleaner(): ConditionalAvailabilityDeliveryDateCleanerInterface
+    {
+        return new ConditionalAvailabilityDeliveryDateCleaner();
     }
 
     /**

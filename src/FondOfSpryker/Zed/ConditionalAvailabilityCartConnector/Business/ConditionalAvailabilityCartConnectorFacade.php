@@ -36,4 +36,16 @@ class ConditionalAvailabilityCartConnectorFacade extends AbstractFacade implemen
             ->createConditionalAvailabilityItemExpander()
             ->expand($cartChangeTransfer);
     }
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     *
+     * @return \Generated\Shared\Transfer\QuoteTransfer
+     */
+    public function cleanDeliveryDateOnEmptyCart(QuoteTransfer $quoteTransfer): QuoteTransfer
+    {
+        return $this->getFactory()
+            ->createConditionalAvailabilityDeliveryDateCleaner()
+            ->cleanDeliveryDate($quoteTransfer);
+    }
 }

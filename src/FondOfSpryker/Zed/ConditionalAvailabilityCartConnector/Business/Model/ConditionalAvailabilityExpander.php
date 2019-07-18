@@ -63,9 +63,6 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
             $this->expandItem($itemTransfer);
         }
 
-        $deliveryDates =
-
-
         $quoteTransfer->setDeliveryDates($this->createUniqueDates($this->deliveryDates))
             ->setConcreteDeliveryDates($this->createUniqueDates($this->concreteDeliveryDates));
 

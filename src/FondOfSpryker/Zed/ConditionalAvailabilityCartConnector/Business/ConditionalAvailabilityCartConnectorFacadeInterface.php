@@ -22,4 +22,11 @@ interface ConditionalAvailabilityCartConnectorFacadeInterface
      * @return \Generated\Shared\Transfer\CartChangeTransfer
      */
     public function expandChangedCartItems(CartChangeTransfer $cartChangeTransfer): CartChangeTransfer;
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     *
+     * @return \Generated\Shared\Transfer\QuoteTransfer
+     */
+    public function cleanDeliveryDateOnEmptyCart(QuoteTransfer $quoteTransfer): QuoteTransfer;
 }
