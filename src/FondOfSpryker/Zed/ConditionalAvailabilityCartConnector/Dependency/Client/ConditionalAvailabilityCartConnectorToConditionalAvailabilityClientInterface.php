@@ -3,7 +3,6 @@
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client;
 
 use Elastica\ResultSet;
-use FondOfSpryker\Client\ConditionalAvailability\ConditionalAvailabilityClientInterface;
 
 interface ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface
 {
