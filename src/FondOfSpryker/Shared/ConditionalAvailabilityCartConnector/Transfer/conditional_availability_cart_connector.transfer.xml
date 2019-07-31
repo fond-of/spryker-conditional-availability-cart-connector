@@ -9,6 +9,12 @@
         <property name="validationMessages" type="Message[]" singular="validationMessage"/>
     </transfer>
 
+    <transfer name="RestItemsAttributes">
+        <property name="deliveryDate" type="string"/>
+        <property name="concreteDeliveryDate" type="string"/>
+        <property name="validationMessages" type="Message[]" singular="validationMessage"/>
+    </transfer>
+
     <transfer name="RestCartItemsAttributes">
         <property name="deliveryDate" type="string" />
         <property name="concreteDeliveryDate" type="string" />

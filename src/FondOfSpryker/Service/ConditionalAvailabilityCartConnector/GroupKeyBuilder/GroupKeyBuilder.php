@@ -4,7 +4,7 @@ namespace FondOfSpryker\Service\ConditionalAvailabilityCartConnector\GroupKeyBui
 
 class GroupKeyBuilder implements GroupKeyBuilderInterface
 {
-    public const GROUP_KEY_DELIMITER = '-';
+    public const GROUP_KEY_DELIMITER = '.';
 
     /**
      * @param string $sku
