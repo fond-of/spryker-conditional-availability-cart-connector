@@ -29,4 +29,11 @@ interface ConditionalAvailabilityCartConnectorFacadeInterface
      * @return \Generated\Shared\Transfer\QuoteTransfer
      */
     public function cleanDeliveryDateOnEmptyCart(QuoteTransfer $quoteTransfer): QuoteTransfer;
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     *
+     * @return \Generated\Shared\Transfer\QuoteTransfer
+     */
+    public function ensureEarliestDate(QuoteTransfer $quoteTransfer): QuoteTransfer;
 }

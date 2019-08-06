@@ -48,4 +48,16 @@ class ConditionalAvailabilityCartConnectorFacade extends AbstractFacade implemen
             ->createConditionalAvailabilityDeliveryDateCleaner()
             ->cleanDeliveryDate($quoteTransfer);
     }
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     *
+     * @return \Generated\Shared\Transfer\QuoteTransfer
+     */
+    public function ensureEarliestDate(QuoteTransfer $quoteTransfer): QuoteTransfer
+    {
+        return $this->getFactory()
+            ->createConditionalAvailabilityEnsureEarliestDate()
+            ->ensureEarliestDate($quoteTransfer);
+    }
 }
