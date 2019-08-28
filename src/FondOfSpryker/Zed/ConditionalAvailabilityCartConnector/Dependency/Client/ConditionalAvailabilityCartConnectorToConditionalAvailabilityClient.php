@@ -2,7 +2,6 @@
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client;
 
-use Elastica\ResultSet;
 use FondOfSpryker\Client\ConditionalAvailability\ConditionalAvailabilityClientInterface;
 
 class ConditionalAvailabilityCartConnectorToConditionalAvailabilityClient implements ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface
@@ -14,7 +13,6 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityClient implem
 
     /**
      * @param \FondOfSpryker\Client\ConditionalAvailability\ConditionalAvailabilityClientInterface $client
-     *
      */
     public function __construct(ConditionalAvailabilityClientInterface $client)
     {
@@ -25,9 +23,9 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityClient implem
      * @param string|null $searchString
      * @param string[] $requestParameters
      *
-     * @return \Elastica\ResultSet
+     * @return array
      */
-    public function conditionalAvailabilitySkuSearch(?string $searchString, array $requestParameters = []): ResultSet
+    public function conditionalAvailabilitySkuSearch(?string $searchString, array $requestParameters = []): array
     {
         return $this->client->conditionalAvailabilitySkuSearch($searchString, $requestParameters);
     }

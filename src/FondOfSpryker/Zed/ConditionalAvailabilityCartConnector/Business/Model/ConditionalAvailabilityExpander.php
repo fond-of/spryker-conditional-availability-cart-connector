@@ -13,8 +13,10 @@ use function array_unique;
 
 class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpanderInterface
 {
-    protected const MESSAGE_TYPE_ERROR = 'error';
+    protected const SEARCH_KEY = 'periods';
     protected const DELIVERY_DATE_FORMAT = 'Y-m-d';
+
+    protected const MESSAGE_TYPE_ERROR = 'error';
 
     protected const MESSAGE_NOT_AVAILABLE_FOR_GIVEN_DELIVERY_DATE = 'conditional_availability_cart_connector.not_available_for_given_delivery_date';
     protected const MESSAGE_NOT_AVAILABLE_FOR_EARLIEST_DELIVERY_DATE = 'conditional_availability_cart_connector.not_available_for_earliest_delivery_date';
@@ -94,26 +96,25 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     {
         $earliestDeliveryDate = $this->conditionalAvailabilityService->generateEarliestDeliveryDate();
 
-        $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
+        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
             ConditionalAvailabilityConstants::PARAMETER_START_AT => $earliestDeliveryDate,
             ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
         ]);
 
-        if ($resultSet->count() === 0) {
+        if (!array_key_exists(static::SEARCH_KEY, $result) || count($result[static::SEARCH_KEY]) === 0) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForEarliestDeliveryDateMessage());
         }
 
-        foreach ($resultSet->getResults() as $result) {
-            $data = $result->getData();
-            $dataQuantityInt = (int)$data['qty'];
-            $dataStartAt = $data['startAt'];
+        foreach ($result[static::SEARCH_KEY] as $period) {
+            $periodQuantity = (int)$period['qty'];
+            $periodStartAt = $period['startAt'];
 
-            if ($dataQuantityInt < $itemTransfer->getQuantity()) {
+            if ($periodQuantity < $itemTransfer->getQuantity()) {
                 $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
             }
 
             $itemTransfer->setDeliveryDate(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE);
-            $startAtString = (new DateTime($dataStartAt))->format(static::DELIVERY_DATE_FORMAT);
+            $startAtString = (new DateTime($periodStartAt))->format(static::DELIVERY_DATE_FORMAT);
             $itemTransfer->setConcreteDeliveryDate($startAtString);
 
             $this->deliveryDates[] = ConditionalAvailabilityConstants::KEY_EARLIEST_DATE;
@@ -137,21 +138,20 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $concreteDeliveryDate = $itemTransfer->getDeliveryDate();
         $startAndEndAt = new DateTime($concreteDeliveryDate);
 
-        $resultSet = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
+        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
             ConditionalAvailabilityConstants::PARAMETER_START_AT => $startAndEndAt,
             ConditionalAvailabilityConstants::PARAMETER_END_AT => $startAndEndAt,
             ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
         ]);
 
-        if ($resultSet->count() === 0) {
+        if (!array_key_exists(static::SEARCH_KEY, $result) || count($result[static::SEARCH_KEY]) === 0) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenDeliveryDateMessage());
         }
 
-        foreach ($resultSet->getResults() as $result) {
-            $data = $result->getData();
-            $dataQuantityInt = (int)$data['qty'];
+        foreach ($result[static::SEARCH_KEY] as $period) {
+            $periodQuantity = (int)$period['qty'];
 
-            if ($dataQuantityInt < $itemTransfer->getQuantity()) {
+            if ($periodQuantity < $itemTransfer->getQuantity()) {
                 $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
             }
 
