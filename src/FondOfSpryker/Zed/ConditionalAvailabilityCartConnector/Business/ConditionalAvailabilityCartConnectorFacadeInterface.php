@@ -14,7 +14,7 @@ interface ConditionalAvailabilityCartConnectorFacadeInterface
      *
      * @return \Generated\Shared\Transfer\QuoteTransfer
      */
-    public function expandQuoteAfterReloadItems(QuoteTransfer $quoteTransfer): QuoteTransfer;
+    public function expandQuote(QuoteTransfer $quoteTransfer): QuoteTransfer;
 
     /**
      * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
