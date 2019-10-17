@@ -43,6 +43,11 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     private $concreteDeliveryDates = [];
 
     /**
+     * @var array
+     */
+    protected $defaultRequestParameters = [];
+
+    /**
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface $conditionalAvailabilityClient
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService
      */
@@ -61,6 +66,8 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     public function expand(QuoteTransfer $quoteTransfer): QuoteTransfer
     {
+        $this->initDefaultRequestParameters($quoteTransfer);
+
         foreach ($quoteTransfer->getItems() as $itemTransfer) {
             $this->expandItem($itemTransfer);
         }
@@ -96,10 +103,14 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     {
         $earliestDeliveryDate = $this->conditionalAvailabilityService->generateEarliestDeliveryDate();
 
-        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
+        $requestParameters = array_merge($this->defaultRequestParameters, [
             ConditionalAvailabilityConstants::PARAMETER_START_AT => $earliestDeliveryDate,
-            ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
         ]);
+
+        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch(
+            $itemTransfer->getSku(),
+            $requestParameters
+        );
 
         if (!array_key_exists(static::SEARCH_KEY, $result) || count($result[static::SEARCH_KEY]) === 0) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForEarliestDeliveryDateMessage());
@@ -138,11 +149,15 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $concreteDeliveryDate = $itemTransfer->getDeliveryDate();
         $startAndEndAt = new DateTime($concreteDeliveryDate);
 
-        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch($itemTransfer->getSku(), [
+        $requestParameters = array_merge($this->defaultRequestParameters, [
             ConditionalAvailabilityConstants::PARAMETER_START_AT => $startAndEndAt,
             ConditionalAvailabilityConstants::PARAMETER_END_AT => $startAndEndAt,
-            ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
         ]);
+
+        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch(
+            $itemTransfer->getSku(),
+            $requestParameters
+        );
 
         if (!array_key_exists(static::SEARCH_KEY, $result) || count($result[static::SEARCH_KEY]) === 0) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenDeliveryDateMessage());
@@ -212,5 +227,20 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     protected function createUniqueDates(array $dates): array
     {
         return array_values(array_unique($dates));
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     *
+     * @return $this
+     */
+    protected function initDefaultRequestParameters(QuoteTransfer $quoteTransfer): ConditionalAvailabilityExpanderInterface
+    {
+        $this->defaultRequestParameters = [
+            ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
+            ConditionalAvailabilityConstants::PARAMETER_QUOTE_TRANSFER => $quoteTransfer,
+        ];
+
+        return $this;
     }
 }
