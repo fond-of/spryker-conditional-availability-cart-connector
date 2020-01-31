@@ -14,7 +14,7 @@ use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\Condit
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpander;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpanderInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorDependencyProvider;
-use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
 use Spryker\Zed\Search\Business\SearchBusinessFactory;
 
@@ -30,7 +30,7 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
     public function createConditionalAvailabilityExpander(): ConditionalAvailabilityExpanderInterface
     {
         return new ConditionalAvailabilityExpander(
-            $this->getConditionalAvailabilityClient(),
+            $this->getConditionalAvailabilityFacade(),
             $this->getConditionalAvailabilityService()
         );
     }
@@ -78,16 +78,20 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
      */
     protected function getConditionalAvailabilityService(): ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
     {
-        return $this->getProvidedDependency(ConditionalAvailabilityCartConnectorDependencyProvider::SERVICE_CONDITIONAL_AVAILABILITY);
+        return $this->getProvidedDependency(
+            ConditionalAvailabilityCartConnectorDependencyProvider::SERVICE_CONDITIONAL_AVAILABILITY
+        );
     }
 
     /**
      * @throws
      *
-     * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface
+     * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface
      */
-    protected function getConditionalAvailabilityClient(): ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface
+    protected function getConditionalAvailabilityFacade(): ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface
     {
-        return $this->getProvidedDependency(ConditionalAvailabilityCartConnectorDependencyProvider::CLIENT_CONDITIONAL_AVAILABILITY);
+        return $this->getProvidedDependency(
+            ConditionalAvailabilityCartConnectorDependencyProvider::FACADE_CONDITIONAL_AVAILABILITY
+        );
     }
 }

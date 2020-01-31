@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector;
 
-use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClient;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
 use Spryker\Zed\Kernel\Container;
 use Spryker\Zed\Search\SearchDependencyProvider;
 
 class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDependencyProvider
 {
-    public const CLIENT_CONDITIONAL_AVAILABILITY = 'CLIENT_CONDITIONAL_AVAILABILITY';
+    public const FACADE_CONDITIONAL_AVAILABILITY = 'FACADE_CONDITIONAL_AVAILABILITY';
     public const SERVICE_CONDITIONAL_AVAILABILITY = 'SERVICE_CONDITIONAL_AVAILABILITY';
     public const SERVICE = 'SERVICE';
 
@@ -24,7 +24,7 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
     {
         $container = parent::provideBusinessLayerDependencies($container);
 
-        $container = $this->addConditionalAvailabilityClient($container);
+        $container = $this->addConditionalAvailabilityFacade($container);
         $container = $this->addConditionalAvailabilityService($container);
         $container = $this->addService($container);
 
@@ -36,11 +36,11 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
      *
      * @return \Spryker\Zed\Kernel\Container
      */
-    protected function addConditionalAvailabilityClient(Container $container): Container
+    protected function addConditionalAvailabilityFacade(Container $container): Container
     {
-        $container[static::CLIENT_CONDITIONAL_AVAILABILITY] = static function (Container $container) {
-            return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityClient(
-                $container->getLocator()->conditionalAvailability()->client()
+        $container[static::FACADE_CONDITIONAL_AVAILABILITY] = static function (Container $container) {
+            return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge(
+                $container->getLocator()->conditionalAvailability()->facade()
             );
         };
 

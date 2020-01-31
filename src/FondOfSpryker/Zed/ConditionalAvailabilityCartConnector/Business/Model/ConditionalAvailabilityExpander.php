@@ -2,10 +2,12 @@
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model;
 
+use ArrayObject;
 use DateTime;
 use FondOfSpryker\Shared\ConditionalAvailability\ConditionalAvailabilityConstants;
-use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
+use Generated\Shared\Transfer\ConditionalAvailabilityCriteriaFilterTransfer;
 use Generated\Shared\Transfer\ItemTransfer;
 use Generated\Shared\Transfer\MessageTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
@@ -13,7 +15,6 @@ use function array_unique;
 
 class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpanderInterface
 {
-    protected const SEARCH_KEY = 'periods';
     protected const DELIVERY_DATE_FORMAT = 'Y-m-d';
 
     protected const MESSAGE_TYPE_ERROR = 'error';
@@ -23,9 +24,9 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     protected const MESSAGE_NOT_AVAILABLE_FOR_GIVEN_QTY = 'conditional_availability_cart_connector.not_available_for_given_qty';
 
     /**
-     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface
+     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface
      */
-    protected $conditionalAvailabilityClient;
+    protected $conditionalAvailabilityFacade;
 
     /**
      * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
@@ -33,29 +34,14 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     protected $conditionalAvailabilityService;
 
     /**
-     * @var string[]
-     */
-    private $deliveryDates = [];
-
-    /**
-     * @var string[]
-     */
-    private $concreteDeliveryDates = [];
-
-    /**
-     * @var array
-     */
-    protected $defaultRequestParameters = [];
-
-    /**
-     * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Client\ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface $conditionalAvailabilityClient
+     * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface $conditionalAvailabilityFacade
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService
      */
     public function __construct(
-        ConditionalAvailabilityCartConnectorToConditionalAvailabilityClientInterface $conditionalAvailabilityClient,
+        ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface $conditionalAvailabilityFacade,
         ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService
     ) {
-        $this->conditionalAvailabilityClient = $conditionalAvailabilityClient;
+        $this->conditionalAvailabilityFacade = $conditionalAvailabilityFacade;
         $this->conditionalAvailabilityService = $conditionalAvailabilityService;
     }
 
@@ -66,118 +52,124 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      */
     public function expand(QuoteTransfer $quoteTransfer): QuoteTransfer
     {
-        $this->initDefaultRequestParameters($quoteTransfer);
+        $deliveryDates = [];
+        $concreteDeliveryDates = [];
+        $groupedConditionalAvailabilities = $this->getGroupedConditionalAvailabilitiesByQuoteTransfer($quoteTransfer);
 
         foreach ($quoteTransfer->getItems() as $itemTransfer) {
-            $this->expandItem($itemTransfer);
+            $itemTransfer = $this->expandItem($itemTransfer, $groupedConditionalAvailabilities);
+            $deliveryDates[] = $itemTransfer->getDeliveryDate();
+            $concreteDeliveryDates[] = $itemTransfer->getConcreteDeliveryDate();
         }
 
-        $quoteTransfer->setDeliveryDates($this->createUniqueDates($this->deliveryDates))
-            ->setConcreteDeliveryDates($this->createUniqueDates($this->concreteDeliveryDates));
+        $quoteTransfer->setDeliveryDates($this->createUniqueDates($deliveryDates))
+            ->setConcreteDeliveryDates($this->createUniqueDates($concreteDeliveryDates));
 
         return $quoteTransfer;
     }
 
     /**
      * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
+     * @param \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]> $groupedConditionalAvailabilities
      *
      * @return \Generated\Shared\Transfer\ItemTransfer
      */
-    protected function expandItem(ItemTransfer $itemTransfer): ItemTransfer
-    {
+    protected function expandItem(
+        ItemTransfer $itemTransfer,
+        ArrayObject $groupedConditionalAvailabilities
+    ): ItemTransfer {
         if ($itemTransfer->getDeliveryDate() === ConditionalAvailabilityConstants::KEY_EARLIEST_DATE) {
-            return $this->expandItemWithEarliestDeliveryDate($itemTransfer);
+            return $this->expandItemWithEarliestDeliveryDate($itemTransfer, $groupedConditionalAvailabilities);
         }
 
-        return $this->expandItemWithConcreteDeliveryDate($itemTransfer);
+        return $this->expandItemWithConcreteDeliveryDate($itemTransfer, $groupedConditionalAvailabilities);
     }
 
     /**
      * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
+     * @param \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]> $groupedConditionalAvailabilities
      *
      * @throws
      *
      * @return \Generated\Shared\Transfer\ItemTransfer
      */
-    protected function expandItemWithEarliestDeliveryDate(ItemTransfer $itemTransfer): ItemTransfer
-    {
+    protected function expandItemWithEarliestDeliveryDate(
+        ItemTransfer $itemTransfer,
+        ArrayObject $groupedConditionalAvailabilities
+    ): ItemTransfer {
         $earliestDeliveryDate = $this->conditionalAvailabilityService->generateEarliestDeliveryDate();
+        $sku = $itemTransfer->getSku();
+        $quantity = $itemTransfer->getQuantity();
 
-        $requestParameters = array_merge($this->defaultRequestParameters, [
-            ConditionalAvailabilityConstants::PARAMETER_START_AT => $earliestDeliveryDate,
-        ]);
-
-        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch(
-            $itemTransfer->getSku(),
-            $requestParameters
-        );
-
-        if (!array_key_exists(static::SEARCH_KEY, $result) || count($result[static::SEARCH_KEY]) === 0) {
+        if (!$groupedConditionalAvailabilities->offsetExists($sku)) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForEarliestDeliveryDateMessage());
         }
 
-        foreach ($result[static::SEARCH_KEY] as $period) {
-            $periodQuantity = (int)$period['qty'];
-            $periodStartAt = $period['startAt'];
+        foreach ($groupedConditionalAvailabilities->offsetGet($sku) as $conditionalAvailability) {
+            $conditionalAvailabilityPeriodCollectionTransfer = $conditionalAvailability->getConditionalAvailabilityPeriodCollection();
 
-            if ($periodQuantity < $itemTransfer->getQuantity()) {
-                $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
+            if ($conditionalAvailabilityPeriodCollectionTransfer === null) {
+                return $itemTransfer->addValidationMessage($this->createNotAvailableForEarliestDeliveryDateMessage());
             }
 
-            $itemTransfer->setDeliveryDate(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE);
-            $startAtString = (new DateTime($periodStartAt))->format(static::DELIVERY_DATE_FORMAT);
-            $itemTransfer->setConcreteDeliveryDate($startAtString);
+            foreach ($conditionalAvailabilityPeriodCollectionTransfer->getConditionalAvailabilityPeriods() as $conditionalAvailabilityPeriodTransfer) {
+                $startAt = new DateTime($conditionalAvailabilityPeriodTransfer->getStartAt());
+                $availableQuantity = $conditionalAvailabilityPeriodTransfer->getQuantity();
 
-            $this->deliveryDates[] = ConditionalAvailabilityConstants::KEY_EARLIEST_DATE;
-            $this->concreteDeliveryDates[] = $startAtString;
+                if ($earliestDeliveryDate > $startAt || $availableQuantity < $quantity) {
+                    continue;
+                }
 
-            break;
+                return $itemTransfer->setDeliveryDate(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE)
+                    ->setConcreteDeliveryDate($startAt->format(static::DELIVERY_DATE_FORMAT));
+            }
         }
 
-        return $itemTransfer;
+        return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
     }
 
     /**
      * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
+     * @param \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]> $groupedConditionalAvailabilities
      *
      * @throws
      *
      * @return \Generated\Shared\Transfer\ItemTransfer
      */
-    protected function expandItemWithConcreteDeliveryDate(ItemTransfer $itemTransfer): ItemTransfer
-    {
-        $concreteDeliveryDate = $itemTransfer->getDeliveryDate();
-        $startAndEndAt = new DateTime($concreteDeliveryDate);
+    protected function expandItemWithConcreteDeliveryDate(
+        ItemTransfer $itemTransfer,
+        ArrayObject $groupedConditionalAvailabilities
+    ): ItemTransfer {
+        $sku = $itemTransfer->getSku();
+        $quantity = $itemTransfer->getQuantity();
+        $concreteDeliveryDate = new DateTime($itemTransfer->getDeliveryDate());
 
-        $requestParameters = array_merge($this->defaultRequestParameters, [
-            ConditionalAvailabilityConstants::PARAMETER_START_AT => $startAndEndAt,
-            ConditionalAvailabilityConstants::PARAMETER_END_AT => $startAndEndAt,
-        ]);
-
-        $result = $this->conditionalAvailabilityClient->conditionalAvailabilitySkuSearch(
-            $itemTransfer->getSku(),
-            $requestParameters
-        );
-
-        if (!array_key_exists(static::SEARCH_KEY, $result) || count($result[static::SEARCH_KEY]) === 0) {
+        if (!$groupedConditionalAvailabilities->offsetExists($sku)) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenDeliveryDateMessage());
         }
 
-        foreach ($result[static::SEARCH_KEY] as $period) {
-            $periodQuantity = (int)$period['qty'];
+        foreach ($groupedConditionalAvailabilities->offsetGet($sku) as $conditionalAvailability) {
+            $conditionalAvailabilityPeriodCollectionTransfer = $conditionalAvailability->getConditionalAvailabilityPeriodCollection();
 
-            if ($periodQuantity < $itemTransfer->getQuantity()) {
-                $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
+            if ($conditionalAvailabilityPeriodCollectionTransfer === null) {
+                return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenDeliveryDateMessage());
             }
 
-            $itemTransfer->setDeliveryDate($concreteDeliveryDate)
-                ->setConcreteDeliveryDate($concreteDeliveryDate);
+            foreach ($conditionalAvailabilityPeriodCollectionTransfer->getConditionalAvailabilityPeriods() as $conditionalAvailabilityPeriodTransfer) {
+                $startAt = new DateTime($conditionalAvailabilityPeriodTransfer->getStartAt());
+                $endAt = new DateTime($conditionalAvailabilityPeriodTransfer->getEndAt());
+                $availableQuantity = $conditionalAvailabilityPeriodTransfer->getQuantity();
 
-            $this->deliveryDates[] = $concreteDeliveryDate;
-            $this->concreteDeliveryDates[] = $concreteDeliveryDate;
+                if ($concreteDeliveryDate < $startAt || $concreteDeliveryDate > $endAt || $availableQuantity < $quantity) {
+                    continue;
+                }
+
+                return $itemTransfer->setDeliveryDate(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE)
+                    ->setConcreteDeliveryDate($startAt->format(static::DELIVERY_DATE_FORMAT));
+            }
         }
 
-        return $itemTransfer;
+        return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenQytMessage());
     }
 
     /**
@@ -232,15 +224,57 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     /**
      * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
      *
-     * @return $this
+     * @return \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]>
      */
-    protected function initDefaultRequestParameters(QuoteTransfer $quoteTransfer): ConditionalAvailabilityExpanderInterface
+    protected function getGroupedConditionalAvailabilitiesByQuoteTransfer(QuoteTransfer $quoteTransfer): ArrayObject
     {
-        $this->defaultRequestParameters = [
-            ConditionalAvailabilityConstants::PARAMETER_WAREHOUSE => ConditionalAvailabilityConstants::DEFAULT_WAREHOUSE,
-            ConditionalAvailabilityConstants::PARAMETER_QUOTE_TRANSFER => $quoteTransfer,
-        ];
+        $skus = $this->getSkusByQuoteTransfer($quoteTransfer);
 
-        return $this;
+        if (count($skus) === 0) {
+            return new ArrayObject();
+        }
+
+        $isAccessible = $this->getIsAccessibleByQuoteTransfer($quoteTransfer);
+
+        $conditionalAvailabilityCriteriaFilterTransfer = (new ConditionalAvailabilityCriteriaFilterTransfer())
+            ->setSkus($skus)
+            ->setWarehouseGroup('EU')
+            ->setIsAccessible($isAccessible);
+
+        return $this->conditionalAvailabilityFacade->findGroupedConditionalAvailabilities(
+            $conditionalAvailabilityCriteriaFilterTransfer
+        );
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     *
+     * @return string[]
+     */
+    protected function getSkusByQuoteTransfer(QuoteTransfer $quoteTransfer): array
+    {
+        $skus = [];
+
+        foreach ($quoteTransfer->getItems() as $item) {
+            $skus[] = $item->getSku();
+        }
+
+        return array_unique($skus);
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     *
+     * @return bool|null
+     */
+    protected function getIsAccessibleByQuoteTransfer(QuoteTransfer $quoteTransfer): ?bool
+    {
+        $customerTransfer = $quoteTransfer->getCustomer();
+
+        if ($customerTransfer === null) {
+            return null;
+        }
+
+        return $customerTransfer->getHasAvailabilityRestrictions() === true ? true : null;
     }
 }
