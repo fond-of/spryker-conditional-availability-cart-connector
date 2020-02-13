@@ -116,7 +116,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
                 $startAt = new DateTime($conditionalAvailabilityPeriodTransfer->getStartAt());
                 $availableQuantity = $conditionalAvailabilityPeriodTransfer->getQuantity();
 
-                if ($earliestDeliveryDate > $startAt || $availableQuantity < $quantity) {
+                if ($earliestDeliveryDate < $startAt || $availableQuantity < $quantity) {
                     continue;
                 }
 
@@ -239,7 +239,8 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $conditionalAvailabilityCriteriaFilterTransfer = (new ConditionalAvailabilityCriteriaFilterTransfer())
             ->setSkus($skus)
             ->setWarehouseGroup('EU')
-            ->setIsAccessible($isAccessible);
+            ->setIsAccessible($isAccessible)
+            ->setMinimumQuantity(1);
 
         return $this->conditionalAvailabilityFacade->findGroupedConditionalAvailabilities(
             $conditionalAvailabilityCriteriaFilterTransfer
