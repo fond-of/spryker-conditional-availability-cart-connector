@@ -89,8 +89,6 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
      * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
      * @param \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]> $groupedConditionalAvailabilities
      *
-     * @throws
-     *
      * @return \Generated\Shared\Transfer\ItemTransfer
      */
     protected function expandItemWithEarliestDeliveryDate(
@@ -131,8 +129,6 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     /**
      * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
      * @param \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]> $groupedConditionalAvailabilities
-     *
-     * @throws
      *
      * @return \Generated\Shared\Transfer\ItemTransfer
      */

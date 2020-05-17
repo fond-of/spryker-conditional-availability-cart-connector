@@ -62,8 +62,6 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
     }
 
     /**
-     * @throws
-     *
      * @return \FondOfSpryker\Service\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorServiceInterface
      */
     protected function getService(): ConditionalAvailabilityCartConnectorServiceInterface
@@ -72,8 +70,6 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
     }
 
     /**
-     * @throws
-     *
      * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
      */
     protected function getConditionalAvailabilityService(): ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
@@ -84,8 +80,6 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
     }
 
     /**
-     * @throws
-     *
      * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface
      */
     protected function getConditionalAvailabilityFacade(): ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface
