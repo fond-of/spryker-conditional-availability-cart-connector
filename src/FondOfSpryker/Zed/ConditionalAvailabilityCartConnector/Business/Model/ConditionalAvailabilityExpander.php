@@ -128,7 +128,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
 
     /**
      * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
-     * @param \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]> $groupedConditionalAvailabilities
+     * @param \ArrayObject $groupedConditionalAvailabilities
      *
      * @return \Generated\Shared\Transfer\ItemTransfer
      */
@@ -220,7 +220,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     /**
      * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
      *
-     * @return \ArrayObject<string,\Generated\Shared\Transfer\ConditionalAvailabilityTransfer[]>
+     * @return \ArrayObject
      */
     protected function getGroupedConditionalAvailabilitiesByQuoteTransfer(QuoteTransfer $quoteTransfer): ArrayObject
     {
