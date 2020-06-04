@@ -12,13 +12,13 @@ use Spryker\Glue\Kernel\AbstractPlugin;
 class ConditionalAvailabilityCartConnectorGroupKeyRestCartItemExpanderPlugin extends AbstractPlugin implements RestCartItemExpanderPluginInterface
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
+     *
+     * @api
      *
      * @param \Generated\Shared\Transfer\RestCartItemTransfer $restCartItemTransfer
      *
      * @return \Generated\Shared\Transfer\RestCartItemTransfer
-     * @api
-     *
      */
     public function expand(RestCartItemTransfer $restCartItemTransfer): RestCartItemTransfer
     {

@@ -14,12 +14,13 @@ use Spryker\Zed\QuoteExtension\Dependency\Plugin\QuoteExpanderPluginInterface;
 class ConditionalAvailabilityQuoteExpanderPlugin extends AbstractPlugin implements QuoteExpanderPluginInterface
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
+     *
+     * @api
      *
      * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
      *
      * @return \Generated\Shared\Transfer\QuoteTransfer
-     * @api
      */
     public function expand(QuoteTransfer $quoteTransfer): QuoteTransfer
     {

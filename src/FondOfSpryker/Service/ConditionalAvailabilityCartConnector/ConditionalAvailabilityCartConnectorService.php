@@ -12,7 +12,7 @@ use Spryker\Service\Kernel\AbstractService;
 class ConditionalAvailabilityCartConnectorService extends AbstractService implements ConditionalAvailabilityCartConnectorServiceInterface
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @api
      *
@@ -26,7 +26,7 @@ class ConditionalAvailabilityCartConnectorService extends AbstractService implem
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @api
      *
