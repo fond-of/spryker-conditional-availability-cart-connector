@@ -112,14 +112,17 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
 
             foreach ($conditionalAvailabilityPeriodCollectionTransfer->getConditionalAvailabilityPeriods() as $conditionalAvailabilityPeriodTransfer) {
                 $startAt = new DateTime($conditionalAvailabilityPeriodTransfer->getStartAt());
+                $endAt = new DateTime($conditionalAvailabilityPeriodTransfer->getEndAt());
                 $availableQuantity = $conditionalAvailabilityPeriodTransfer->getQuantity();
 
-                if ($earliestDeliveryDate < $startAt || $availableQuantity < $quantity) {
+                if ($earliestDeliveryDate > $endAt  || $availableQuantity < $quantity) {
                     continue;
                 }
 
+                $concreteDeliveryDate = $startAt < $earliestDeliveryDate ? $earliestDeliveryDate : $startAt;
+
                 return $itemTransfer->setDeliveryDate(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE)
-                    ->setConcreteDeliveryDate($startAt->format(static::DELIVERY_DATE_FORMAT));
+                    ->setConcreteDeliveryDate($concreteDeliveryDate->format(static::DELIVERY_DATE_FORMAT));
             }
         }
 
