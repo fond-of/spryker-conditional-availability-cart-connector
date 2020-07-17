@@ -115,7 +115,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
                 $endAt = new DateTime($conditionalAvailabilityPeriodTransfer->getEndAt());
                 $availableQuantity = $conditionalAvailabilityPeriodTransfer->getQuantity();
 
-                if ($earliestDeliveryDate > $endAt  || $availableQuantity < $quantity) {
+                if ($earliestDeliveryDate > $endAt || $availableQuantity < $quantity) {
                     continue;
                 }
 
