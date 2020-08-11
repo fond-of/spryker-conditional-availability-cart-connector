@@ -59,6 +59,11 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         foreach ($quoteTransfer->getItems() as $itemTransfer) {
             $itemTransfer = $this->expandItem($itemTransfer, $groupedConditionalAvailabilities);
             $deliveryDates[] = $itemTransfer->getDeliveryDate();
+
+            if ($itemTransfer->getConcreteDeliveryDate() === null) {
+                continue;
+            }
+
             $concreteDeliveryDates[] = $itemTransfer->getConcreteDeliveryDate();
         }
 
