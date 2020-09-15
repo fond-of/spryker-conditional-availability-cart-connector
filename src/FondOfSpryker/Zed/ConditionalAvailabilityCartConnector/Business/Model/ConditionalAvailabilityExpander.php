@@ -169,7 +169,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
                 }
 
                 return $itemTransfer->setDeliveryDate($concreteDeliveryDate->format(static::DELIVERY_DATE_FORMAT))
-                    ->setConcreteDeliveryDate($startAt->format(static::DELIVERY_DATE_FORMAT));
+                    ->setConcreteDeliveryDate($concreteDeliveryDate->format(static::DELIVERY_DATE_FORMAT));
             }
         }
 
