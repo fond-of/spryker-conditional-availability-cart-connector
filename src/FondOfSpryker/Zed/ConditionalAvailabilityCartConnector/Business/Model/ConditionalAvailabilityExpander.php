@@ -6,8 +6,10 @@ use ArrayObject;
 use DateTime;
 use FondOfSpryker\Shared\ConditionalAvailability\ConditionalAvailabilityConstants;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
 use Generated\Shared\Transfer\ConditionalAvailabilityCriteriaFilterTransfer;
+use Generated\Shared\Transfer\CustomerTransfer;
 use Generated\Shared\Transfer\ItemTransfer;
 use Generated\Shared\Transfer\MessageTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
@@ -34,15 +36,23 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     protected $conditionalAvailabilityService;
 
     /**
+     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeInterface
+     */
+    protected $customerFacade;
+
+    /**
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface $conditionalAvailabilityFacade
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService
+     * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeInterface $customerFacade
      */
     public function __construct(
         ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface $conditionalAvailabilityFacade,
-        ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService
+        ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService,
+        ConditionalAvailabilityCartConnectorToCustomerFacadeInterface $customerFacade
     ) {
         $this->conditionalAvailabilityFacade = $conditionalAvailabilityFacade;
         $this->conditionalAvailabilityService = $conditionalAvailabilityService;
+        $this->customerFacade = $customerFacade;
     }
 
     /**
@@ -277,7 +287,8 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $customerTransfer = $quoteTransfer->getCustomer();
 
         if ($customerTransfer === null) {
-            return null;
+            $customerTransfer = (new CustomerTransfer())->setCustomerReference($quoteTransfer->getCustomerReference());
+            $customerTransfer = $this->customerFacade->getCustomer($customerTransfer);
         }
 
         return $customerTransfer->getHasAvailabilityRestrictions() === true ? true : null;
