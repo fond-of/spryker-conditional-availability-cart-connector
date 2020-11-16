@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector;
 
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
 use Spryker\Zed\Kernel\Container;
 use Spryker\Zed\Search\SearchDependencyProvider;
@@ -12,6 +13,7 @@ use Spryker\Zed\Search\SearchDependencyProvider;
 class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDependencyProvider
 {
     public const FACADE_CONDITIONAL_AVAILABILITY = 'FACADE_CONDITIONAL_AVAILABILITY';
+    public const FACADE_CUSTOMER = 'FACADE_CUSTOMER';
     public const SERVICE_CONDITIONAL_AVAILABILITY = 'SERVICE_CONDITIONAL_AVAILABILITY';
     public const SERVICE = 'SERVICE';
 
@@ -25,6 +27,7 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
         $container = parent::provideBusinessLayerDependencies($container);
 
         $container = $this->addConditionalAvailabilityFacade($container);
+        $container = $this->addCustomerFacade($container);
         $container = $this->addConditionalAvailabilityService($container);
         $container = $this->addService($container);
 
@@ -41,6 +44,22 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
         $container[static::FACADE_CONDITIONAL_AVAILABILITY] = static function (Container $container) {
             return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge(
                 $container->getLocator()->conditionalAvailability()->facade()
+            );
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addCustomerFacade(Container $container): Container
+    {
+        $container[static::FACADE_CUSTOMER] = static function (Container $container) {
+            return new ConditionalAvailabilityCartConnectorToCustomerFacadeBridge(
+                $container->getLocator()->customer()->facade()
             );
         };
 

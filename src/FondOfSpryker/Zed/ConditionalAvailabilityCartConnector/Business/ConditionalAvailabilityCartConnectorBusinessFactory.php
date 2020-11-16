@@ -15,6 +15,7 @@ use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\Condit
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpanderInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorDependencyProvider;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface;
 use Spryker\Zed\Search\Business\SearchBusinessFactory;
 
@@ -31,7 +32,8 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
     {
         return new ConditionalAvailabilityExpander(
             $this->getConditionalAvailabilityFacade(),
-            $this->getConditionalAvailabilityService()
+            $this->getConditionalAvailabilityService(),
+            $this->getCustomerFacade()
         );
     }
 
@@ -86,6 +88,16 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
     {
         return $this->getProvidedDependency(
             ConditionalAvailabilityCartConnectorDependencyProvider::FACADE_CONDITIONAL_AVAILABILITY
+        );
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeInterface
+     */
+    protected function getCustomerFacade(): ConditionalAvailabilityCartConnectorToCustomerFacadeInterface
+    {
+        return $this->getProvidedDependency(
+            ConditionalAvailabilityCartConnectorDependencyProvider::FACADE_CUSTOMER
         );
     }
 }
