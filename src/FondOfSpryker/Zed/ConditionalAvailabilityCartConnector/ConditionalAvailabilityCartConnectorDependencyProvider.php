@@ -7,6 +7,7 @@ namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
+use Orm\Zed\Customer\Persistence\SpyCustomerQuery;
 use Spryker\Zed\Kernel\Container;
 use Spryker\Zed\Search\SearchDependencyProvider;
 
@@ -14,6 +15,7 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
 {
     public const FACADE_CONDITIONAL_AVAILABILITY = 'FACADE_CONDITIONAL_AVAILABILITY';
     public const FACADE_CUSTOMER = 'FACADE_CUSTOMER';
+    public const PROPEL_QUERY_CUSTOMER = 'PROPEL_QUERY_CUSTOMER';
     public const SERVICE_CONDITIONAL_AVAILABILITY = 'SERVICE_CONDITIONAL_AVAILABILITY';
     public const SERVICE = 'SERVICE';
 
@@ -30,6 +32,20 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
         $container = $this->addCustomerFacade($container);
         $container = $this->addConditionalAvailabilityService($container);
         $container = $this->addService($container);
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    public function providePersistenceLayerDependencies(Container $container): Container
+    {
+        $container = parent::providePersistenceLayerDependencies($container);
+
+        $container = $this->addCustomerPropelQuery($container);
 
         return $container;
     }
@@ -91,6 +107,20 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDepen
     {
         $container[static::SERVICE] = static function (Container $container) {
             return $container->getLocator()->conditionalAvailabilityCartConnector()->service();
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addCustomerPropelQuery(Container $container): Container
+    {
+        $container[static::PROPEL_QUERY_CUSTOMER] = static function () {
+            return SpyCustomerQuery::create();
         };
 
         return $container;

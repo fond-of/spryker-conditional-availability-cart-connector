@@ -13,6 +13,8 @@ use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\Condit
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityExpanderInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpander;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\ConditionalAvailabilityItemExpanderInterface;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\CustomerReader;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\CustomerReaderInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorDependencyProvider;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeInterface;
@@ -22,6 +24,7 @@ use Spryker\Zed\Search\Business\SearchBusinessFactory;
 /**
  * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\ConditionalAvailabilityCartConnectorFacadeInterface getFacade()
  * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\ConditionalAvailabilityCartConnectorConfig getConfig()
+ * @method \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Persistence\ConditionalAvailabilityCartConnectorRepositoryInterface getRepository()()
  */
 class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusinessFactory
 {
@@ -33,6 +36,17 @@ class ConditionalAvailabilityCartConnectorBusinessFactory extends SearchBusiness
         return new ConditionalAvailabilityExpander(
             $this->getConditionalAvailabilityFacade(),
             $this->getConditionalAvailabilityService(),
+            $this->createCustomerReader()
+        );
+    }
+
+    /**
+     * @return \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\CustomerReaderInterface
+     */
+    protected function createCustomerReader(): CustomerReaderInterface
+    {
+        return new CustomerReader(
+            $this->getRepository(),
             $this->getCustomerFacade()
         );
     }
