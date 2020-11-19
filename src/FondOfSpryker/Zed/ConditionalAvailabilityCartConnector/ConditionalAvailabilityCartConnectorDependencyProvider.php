@@ -6,10 +6,10 @@ namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector;
 
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
+use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Zed\Kernel\Container;
-use Spryker\Zed\Search\SearchDependencyProvider;
 
-class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDependencyProvider
+class ConditionalAvailabilityCartConnectorDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const FACADE_CONDITIONAL_AVAILABILITY = 'FACADE_CONDITIONAL_AVAILABILITY';
     public const SERVICE_CONDITIONAL_AVAILABILITY = 'SERVICE_CONDITIONAL_AVAILABILITY';
