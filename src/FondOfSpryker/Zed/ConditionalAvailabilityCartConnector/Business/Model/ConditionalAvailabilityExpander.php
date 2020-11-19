@@ -34,15 +34,23 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
     protected $conditionalAvailabilityService;
 
     /**
+     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\CustomerReaderInterface
+     */
+    protected $customerReader;
+
+    /**
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface $conditionalAvailabilityFacade
      * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService
+     * @param \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Business\Model\CustomerReaderInterface $customerReader
      */
     public function __construct(
         ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeInterface $conditionalAvailabilityFacade,
-        ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService
+        ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface $conditionalAvailabilityService,
+        CustomerReaderInterface $customerReader
     ) {
         $this->conditionalAvailabilityFacade = $conditionalAvailabilityFacade;
         $this->conditionalAvailabilityService = $conditionalAvailabilityService;
+        $this->customerReader = $customerReader;
     }
 
     /**
@@ -277,7 +285,9 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $customerTransfer = $quoteTransfer->getCustomer();
 
         if ($customerTransfer === null) {
-            return null;
+            $customerTransfer = $this->customerReader->getCustomerByCustomerReference(
+                $quoteTransfer->getCustomerReference()
+            );
         }
 
         return $customerTransfer->getHasAvailabilityRestrictions() === true ? true : null;

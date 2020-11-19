@@ -5,13 +5,17 @@ declare(strict_types = 1);
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector;
 
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
-use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
+use Orm\Zed\Customer\Persistence\SpyCustomerQuery;
 use Spryker\Zed\Kernel\Container;
+use Spryker\Zed\Search\SearchDependencyProvider;
 
-class ConditionalAvailabilityCartConnectorDependencyProvider extends AbstractBundleDependencyProvider
+class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDependencyProvider
 {
     public const FACADE_CONDITIONAL_AVAILABILITY = 'FACADE_CONDITIONAL_AVAILABILITY';
+    public const FACADE_CUSTOMER = 'FACADE_CUSTOMER';
+    public const PROPEL_QUERY_CUSTOMER = 'PROPEL_QUERY_CUSTOMER';
     public const SERVICE_CONDITIONAL_AVAILABILITY = 'SERVICE_CONDITIONAL_AVAILABILITY';
     public const SERVICE = 'SERVICE';
 
@@ -25,8 +29,23 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends AbstractBun
         $container = parent::provideBusinessLayerDependencies($container);
 
         $container = $this->addConditionalAvailabilityFacade($container);
+        $container = $this->addCustomerFacade($container);
         $container = $this->addConditionalAvailabilityService($container);
         $container = $this->addService($container);
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    public function providePersistenceLayerDependencies(Container $container): Container
+    {
+        $container = parent::providePersistenceLayerDependencies($container);
+
+        $container = $this->addCustomerPropelQuery($container);
 
         return $container;
     }
@@ -41,6 +60,22 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends AbstractBun
         $container[static::FACADE_CONDITIONAL_AVAILABILITY] = static function (Container $container) {
             return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge(
                 $container->getLocator()->conditionalAvailability()->facade()
+            );
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addCustomerFacade(Container $container): Container
+    {
+        $container[static::FACADE_CUSTOMER] = static function (Container $container) {
+            return new ConditionalAvailabilityCartConnectorToCustomerFacadeBridge(
+                $container->getLocator()->customer()->facade()
             );
         };
 
@@ -72,6 +107,20 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends AbstractBun
     {
         $container[static::SERVICE] = static function (Container $container) {
             return $container->getLocator()->conditionalAvailabilityCartConnector()->service();
+        };
+
+        return $container;
+    }
+
+    /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
+     * @return \Spryker\Zed\Kernel\Container
+     */
+    protected function addCustomerPropelQuery(Container $container): Container
+    {
+        $container[static::PROPEL_QUERY_CUSTOMER] = static function () {
+            return SpyCustomerQuery::create();
         };
 
         return $container;
