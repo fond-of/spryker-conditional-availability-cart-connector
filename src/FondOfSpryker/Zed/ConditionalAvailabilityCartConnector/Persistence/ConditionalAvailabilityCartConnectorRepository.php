@@ -19,9 +19,12 @@ class ConditionalAvailabilityCartConnectorRepository extends AbstractRepository 
     {
         $spyCustomerQuery = $this->getFactory()->getCustomerQuery();
 
-        return $spyCustomerQuery->clear()
+        /** @var int|null $idCustomer */
+        $idCustomer = $spyCustomerQuery->clear()
             ->filterByCustomerReference($customerReference)
             ->select(SpyCustomerTableMap::COL_ID_CUSTOMER)
             ->findOne();
+
+        return $idCustomer;
     }
 }
