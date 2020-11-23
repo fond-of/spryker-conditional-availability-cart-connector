@@ -8,10 +8,10 @@ use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\Con
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
 use Orm\Zed\Customer\Persistence\SpyCustomerQuery;
+use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Zed\Kernel\Container;
-use Spryker\Zed\Search\SearchDependencyProvider;
 
-class ConditionalAvailabilityCartConnectorDependencyProvider extends SearchDependencyProvider
+class ConditionalAvailabilityCartConnectorDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const FACADE_CONDITIONAL_AVAILABILITY = 'FACADE_CONDITIONAL_AVAILABILITY';
     public const FACADE_CUSTOMER = 'FACADE_CUSTOMER';
