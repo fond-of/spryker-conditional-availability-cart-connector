@@ -10,14 +10,9 @@ use Generated\Shared\Transfer\ConditionalAvailabilityCriteriaFilterTransfer;
 class ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridgeTest extends Unit
 {
     /**
-     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge
-     */
-    protected $conditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
-
-    /**
      * @var \PHPUnit\Framework\MockObject\MockObject|\FondOfSpryker\Zed\ConditionalAvailability\Business\ConditionalAvailabilityFacadeInterface
      */
-    protected $conditionalAvailabilityFacadeInterfaceMock;
+    protected $conditionalAvailabilityFacadeMock;
 
     /**
      * @var \PHPUnit\Framework\MockObject\MockObject|\Generated\Shared\Transfer\ConditionalAvailabilityCriteriaFilterTransfer
@@ -25,11 +20,16 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridgeT
     protected $conditionalAvailabilityCriteriaFilterTransferMock;
 
     /**
+     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge
+     */
+    protected $conditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
+
+    /**
      * @return void
      */
     protected function _before(): void
     {
-        $this->conditionalAvailabilityFacadeInterfaceMock = $this->getMockBuilder(ConditionalAvailabilityFacadeInterface::class)
+        $this->conditionalAvailabilityFacadeMock = $this->getMockBuilder(ConditionalAvailabilityFacadeInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -38,7 +38,7 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridgeT
             ->getMock();
 
         $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge = new ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge(
-            $this->conditionalAvailabilityFacadeInterfaceMock
+            $this->conditionalAvailabilityFacadeMock
         );
     }
 
@@ -47,13 +47,15 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridgeT
      */
     public function testFindGroupedConditionalAvailabilities(): void
     {
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $groupedConditionalAvailabilities = new ArrayObject([]);
+
+        $this->conditionalAvailabilityFacadeMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->with($this->conditionalAvailabilityCriteriaFilterTransferMock)
-            ->willReturn(new ArrayObject([]));
+            ->willReturn($groupedConditionalAvailabilities);
 
-        $this->assertInstanceOf(
-            ArrayObject::class,
+        static::assertEquals(
+            $groupedConditionalAvailabilities,
             $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge->findGroupedConditionalAvailabilities(
                 $this->conditionalAvailabilityCriteriaFilterTransferMock
             )

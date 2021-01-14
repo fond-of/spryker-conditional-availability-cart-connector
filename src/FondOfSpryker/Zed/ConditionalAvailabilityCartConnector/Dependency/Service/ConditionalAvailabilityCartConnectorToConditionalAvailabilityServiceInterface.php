@@ -2,12 +2,12 @@
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service;
 
-use DateTime;
+use DateTimeInterface;
 
 interface ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
 {
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function generateEarliestDeliveryDate(): DateTime;
+    public function generateEarliestDeliveryDate(): DateTimeInterface;
 }
