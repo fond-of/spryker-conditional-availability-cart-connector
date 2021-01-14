@@ -9,14 +9,9 @@ use FondOfSpryker\Service\ConditionalAvailability\ConditionalAvailabilityService
 class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest extends Unit
 {
     /**
-     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService
-     */
-    protected $conditionalAvailabilityCartConnectorToConditionalAvailabilityService;
-
-    /**
      * @var \PHPUnit\Framework\MockObject\MockObject|\FondOfSpryker\Service\ConditionalAvailability\ConditionalAvailabilityServiceInterface
      */
-    protected $conditionalAvailabilityServiceInterfaceMock;
+    protected $conditionalAvailabilityServiceMock;
 
     /**
      * @var \PHPUnit\Framework\MockObject\MockObject|\DateTime
@@ -24,11 +19,16 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest e
     protected $dateTimeMock;
 
     /**
+     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService
+     */
+    protected $conditionalAvailabilityCartConnectorToConditionalAvailabilityService;
+
+    /**
      * @return void
      */
     protected function _before(): void
     {
-        $this->conditionalAvailabilityServiceInterfaceMock = $this->getMockBuilder(ConditionalAvailabilityServiceInterface::class)
+        $this->conditionalAvailabilityServiceMock = $this->getMockBuilder(ConditionalAvailabilityServiceInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -37,7 +37,7 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest e
             ->getMock();
 
         $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityService = new ConditionalAvailabilityCartConnectorToConditionalAvailabilityService(
-            $this->conditionalAvailabilityServiceInterfaceMock
+            $this->conditionalAvailabilityServiceMock
         );
     }
 
@@ -46,12 +46,12 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest e
      */
     public function testGenerateEarliestDeliveryDate(): void
     {
-        $this->conditionalAvailabilityServiceInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceMock->expects(static::atLeastOnce())
             ->method('generateEarliestDeliveryDate')
             ->willReturn($this->dateTimeMock);
 
-        $this->assertInstanceOf(
-            DateTime::class,
+        static::assertEquals(
+            $this->dateTimeMock,
             $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityService->generateEarliestDeliveryDate()
         );
     }

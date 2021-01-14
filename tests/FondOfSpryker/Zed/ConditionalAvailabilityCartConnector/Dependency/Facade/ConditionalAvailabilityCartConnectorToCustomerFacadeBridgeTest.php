@@ -46,13 +46,13 @@ class ConditionalAvailabilityCartConnectorToCustomerFacadeBridgeTest extends Uni
      */
     public function testGetCustomer(): void
     {
-        $this->customerFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->customerFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->with($this->customerTransferMock)
             ->willReturn($this->customerTransferMock);
 
-        $this->assertInstanceOf(
-            CustomerTransfer::class,
+        static::assertEquals(
+            $this->customerTransferMock,
             $this->conditionalAvailabilityCartConnectorToCustomerFacadeBridge->getCustomer(
                 $this->customerTransferMock
             )
