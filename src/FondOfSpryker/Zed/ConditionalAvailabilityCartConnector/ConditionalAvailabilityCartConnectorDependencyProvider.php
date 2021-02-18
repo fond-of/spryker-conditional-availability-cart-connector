@@ -6,7 +6,7 @@ namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector;
 
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToConditionalAvailabilityFacadeBridge;
 use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Facade\ConditionalAvailabilityCartConnectorToCustomerFacadeBridge;
-use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService;
+use FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridge;
 use Orm\Zed\Customer\Persistence\SpyCustomerQuery;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Zed\Kernel\Container;
@@ -90,7 +90,7 @@ class ConditionalAvailabilityCartConnectorDependencyProvider extends AbstractBun
     protected function addConditionalAvailabilityService(Container $container): Container
     {
         $container[static::SERVICE_CONDITIONAL_AVAILABILITY] = static function (Container $container) {
-            return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityService(
+            return new ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridge(
                 $container->getLocator()->conditionalAvailability()->service()
             );
         };

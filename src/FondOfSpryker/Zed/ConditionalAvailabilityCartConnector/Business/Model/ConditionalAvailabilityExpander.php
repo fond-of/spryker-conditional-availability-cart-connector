@@ -155,6 +155,9 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $sku = $itemTransfer->getSku();
         $quantity = $itemTransfer->getQuantity();
         $concreteDeliveryDate = new DateTime($itemTransfer->getDeliveryDate());
+        $latestOrderDate = $this->conditionalAvailabilityService->generateLatestOrderDateByDeliveryDate(
+            $concreteDeliveryDate
+        );
 
         if (!$groupedConditionalAvailabilities->offsetExists($sku)) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenDeliveryDateMessage());
@@ -172,7 +175,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
                 $endAt = new DateTime($conditionalAvailabilityPeriodTransfer->getEndAt());
                 $availableQuantity = $conditionalAvailabilityPeriodTransfer->getQuantity();
 
-                if ($concreteDeliveryDate < $startAt || $concreteDeliveryDate > $endAt || $availableQuantity < $quantity) {
+                if ($latestOrderDate < $startAt || $latestOrderDate > $endAt || $availableQuantity < $quantity) {
                     continue;
                 }
 
