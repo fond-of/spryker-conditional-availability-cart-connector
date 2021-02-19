@@ -108,6 +108,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         ItemTransfer $itemTransfer,
         ArrayObject $groupedConditionalAvailabilities
     ): ItemTransfer {
+        $today = new DateTime();
         $earliestDeliveryDate = $this->conditionalAvailabilityService->generateEarliestDeliveryDate();
         $sku = $itemTransfer->getSku();
         $quantity = $itemTransfer->getQuantity();
@@ -132,7 +133,12 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
                     continue;
                 }
 
-                $concreteDeliveryDate = $startAt < $earliestDeliveryDate ? $earliestDeliveryDate : $startAt;
+                $concreteDeliveryDate = $earliestDeliveryDate;
+
+                if ($startAt > $today) {
+                    $concreteDeliveryDate = $this->conditionalAvailabilityService
+                        ->generateEarliestDeliveryDateByDateTime($startAt);
+                }
 
                 return $itemTransfer->setDeliveryDate(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE)
                     ->setConcreteDeliveryDate($concreteDeliveryDate->format(static::DELIVERY_DATE_FORMAT));

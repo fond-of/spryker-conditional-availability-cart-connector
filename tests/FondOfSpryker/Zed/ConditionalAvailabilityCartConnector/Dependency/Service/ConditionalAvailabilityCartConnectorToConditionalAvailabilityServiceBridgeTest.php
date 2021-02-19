@@ -68,4 +68,24 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridge
                 ->generateLatestOrderDateByDeliveryDate($deliveryDate)
         );
     }
+
+    /**
+     * @return void
+     */
+    public function testGenerateEarliestDeliveryDateByDateTime(): void
+    {
+        $dateTime = new DateTime();
+        $earliestDeliveryDate = new DateTime();
+
+        $this->conditionalAvailabilityServiceMock->expects(static::atLeastOnce())
+            ->method('generateEarliestDeliveryDateByDateTime')
+            ->with($dateTime)
+            ->willReturn($earliestDeliveryDate);
+
+        static::assertEquals(
+            $earliestDeliveryDate,
+            $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityService
+                ->generateEarliestDeliveryDateByDateTime($dateTime)
+        );
+    }
 }

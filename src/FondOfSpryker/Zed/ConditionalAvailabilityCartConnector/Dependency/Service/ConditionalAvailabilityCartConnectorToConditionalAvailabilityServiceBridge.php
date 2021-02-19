@@ -30,6 +30,16 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridge
     }
 
     /**
+     * @param \DateTime $dateTime
+     *
+     * @return \DateTimeInterface
+     */
+    public function generateEarliestDeliveryDateByDateTime(DateTime $dateTime): DateTimeInterface
+    {
+        return $this->service->generateEarliestDeliveryDateByDateTime($dateTime);
+    }
+
+    /**
      * @param \DateTime $deliveryDate
      *
      * @return \DateTimeInterface
