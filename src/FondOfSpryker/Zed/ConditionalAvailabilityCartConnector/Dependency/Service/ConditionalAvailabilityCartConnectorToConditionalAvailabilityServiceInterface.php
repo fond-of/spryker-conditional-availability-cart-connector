@@ -18,4 +18,11 @@ interface ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceIn
      * @return \DateTimeInterface
      */
     public function generateLatestOrderDateByDeliveryDate(DateTime $deliveryDate): DateTimeInterface;
+
+    /**
+     * @param \DateTime $dateTime
+     *
+     * @return \DateTimeInterface
+     */
+    public function generateEarliestDeliveryDateByDateTime(DateTime $dateTime): DateTimeInterface;
 }
