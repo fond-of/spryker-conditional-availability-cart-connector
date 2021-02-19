@@ -108,7 +108,7 @@ class ConditionalAvailabilityExpanderTest extends Unit
     protected $endAt;
 
     /**
-     * @var string
+     * @var \DateTime
      */
     protected $concreteDeliveryDate;
 
@@ -182,7 +182,7 @@ class ConditionalAvailabilityExpanderTest extends Unit
 
         $this->endAt = (new DateTime())->setDate(2022, 6, 15)->format('Y-m-d');
 
-        $this->concreteDeliveryDate = (new DateTime())->setDate(2021, 6, 15)->format('Y-m-d');
+        $this->concreteDeliveryDate = new DateTime();
 
         $this->customerReference = 'customer-reference';
 
@@ -198,81 +198,85 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpand(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn(null);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomerReference')
             ->willReturn($this->customerReference);
 
-        $this->customerReaderInterfaceMock->expects($this->atLeastOnce())
+        $this->customerReaderInterfaceMock->expects(static::atLeastOnce())
             ->method('getCustomerByCustomerReference')
             ->with($this->customerReference)
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn($this->conditionalAvailabilityTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
-            ->willReturn((new DateTime())->format('Y-m-d'));
+            ->willReturn($this->concreteDeliveryDate->format('Y-m-d'));
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
+            ->method('generateLatestOrderDateByDeliveryDate')
+            ->willReturn($this->concreteDeliveryDate);
+
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->conditionalAvailabilityTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriodCollection')
             ->willReturn($this->conditionalAvailabilityPeriodCollectionTransferMock);
 
-        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriods')
             ->willReturn($this->conditionalAvailabilityPeriodTransferMocks);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getStartAt')
             ->willReturn($this->startAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getEndAt')
             ->willReturn($this->endAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDate')
             ->willReturnSelf();
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDate')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -284,20 +288,20 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandEmpty(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn(new ArrayObject([]));
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -309,72 +313,76 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandNotAvailableForGivenQyt(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn($this->conditionalAvailabilityTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
-            ->willReturn((new DateTime())->format('Y-m-d'));
+            ->willReturn($this->concreteDeliveryDate->format('Y-m-d'));
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
+            ->method('generateLatestOrderDateByDeliveryDate')
+            ->willReturn($this->concreteDeliveryDate);
+
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->conditionalAvailabilityTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriodCollection')
             ->willReturn($this->conditionalAvailabilityPeriodCollectionTransferMock);
 
-        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriods')
             ->willReturn($this->conditionalAvailabilityPeriodTransferMocks);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getStartAt')
             ->willReturn($this->startAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getEndAt')
             ->willReturn($this->endAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn(0);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('addValidationMessage')
             ->willReturnSelf();
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getConcreteDeliveryDate')
-            ->willReturn($this->concreteDeliveryDate);
+            ->willReturn($this->concreteDeliveryDate->format('Y-m-d'));
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -386,52 +394,56 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandNotAvailableForGivenDate(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn($this->conditionalAvailabilityTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
-            ->willReturn((new DateTime())->format('Y-m-d'));
+            ->willReturn($this->concreteDeliveryDate->format('Y-m-d'));
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
+            ->method('generateLatestOrderDateByDeliveryDate')
+            ->willReturn($this->concreteDeliveryDate);
+
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->conditionalAvailabilityTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriodCollection')
             ->willReturn(null);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('addValidationMessage')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -443,48 +455,52 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandNotAvailableForGivenDeliveryDate(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn(new ArrayObject([]));
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('addValidationMessage')
             ->willReturnSelf();
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
-            ->willReturn((new DateTime())->format('Y-m-d'));
+            ->willReturn($this->concreteDeliveryDate->format('Y-m-d'));
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
+            ->method('generateLatestOrderDateByDeliveryDate')
+            ->willReturn($this->concreteDeliveryDate);
+
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -496,76 +512,76 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandEarliestDate(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn($this->conditionalAvailabilityTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
             ->willReturn(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE);
 
-        $this->conditionalAvailabilityServiceInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
             ->method('generateEarliestDeliveryDate')
             ->willReturn($this->dateTime);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->conditionalAvailabilityTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriodCollection')
             ->willReturn($this->conditionalAvailabilityPeriodCollectionTransferMock);
 
-        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriods')
             ->willReturn($this->conditionalAvailabilityPeriodTransferMocks);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getStartAt')
             ->willReturn($this->startAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getEndAt')
             ->willReturn($this->endAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDate')
             ->willReturnSelf();
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDate')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -577,72 +593,72 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandEarliestDeliveryNotAvailableForGivenQyt(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn($this->conditionalAvailabilityTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
             ->willReturn(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE);
 
-        $this->conditionalAvailabilityServiceInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
             ->method('generateEarliestDeliveryDate')
             ->willReturn($this->dateTime);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->conditionalAvailabilityTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriodCollection')
             ->willReturn($this->conditionalAvailabilityPeriodCollectionTransferMock);
 
-        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodCollectionTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriods')
             ->willReturn($this->conditionalAvailabilityPeriodTransferMocks);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getStartAt')
             ->willReturn($this->startAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getEndAt')
             ->willReturn($this->endAt);
 
-        $this->conditionalAvailabilityPeriodTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityPeriodTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn(0);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('addValidationMessage')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -654,52 +670,52 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandEarliestDeliveryNotAvailableForGivenDeliveryDate(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn(new ArrayObject([]));
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('addValidationMessage')
             ->willReturnSelf();
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
             ->willReturn(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE);
 
-        $this->conditionalAvailabilityServiceInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
             ->method('generateEarliestDeliveryDate')
             ->willReturn($this->dateTime);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )
@@ -711,56 +727,56 @@ class ConditionalAvailabilityExpanderTest extends Unit
      */
     public function testExpandEarliestDeliveryNotAvailableForEarliestDeliveryDate(): void
     {
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getItems')
             ->willReturn($this->itemTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getSku')
             ->willReturn($this->sku);
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('getCustomer')
             ->willReturn($this->customerTransferMock);
 
-        $this->customerTransferMock->expects($this->atLeastOnce())
+        $this->customerTransferMock->expects(static::atLeastOnce())
             ->method('getHasAvailabilityRestrictions')
             ->willReturn(false);
 
-        $this->conditionalAvailabilityFacadeInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityFacadeInterfaceMock->expects(static::atLeastOnce())
             ->method('findGroupedConditionalAvailabilities')
             ->willReturn($this->conditionalAvailabilityTransferMocks);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getDeliveryDate')
             ->willReturn(ConditionalAvailabilityConstants::KEY_EARLIEST_DATE);
 
-        $this->conditionalAvailabilityServiceInterfaceMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityServiceInterfaceMock->expects(static::atLeastOnce())
             ->method('generateEarliestDeliveryDate')
             ->willReturn($this->dateTime);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('getQuantity')
             ->willReturn($this->quantity);
 
-        $this->conditionalAvailabilityTransferMock->expects($this->atLeastOnce())
+        $this->conditionalAvailabilityTransferMock->expects(static::atLeastOnce())
             ->method('getConditionalAvailabilityPeriodCollection')
             ->willReturn(null);
 
-        $this->itemTransferMock->expects($this->atLeastOnce())
+        $this->itemTransferMock->expects(static::atLeastOnce())
             ->method('addValidationMessage')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setDeliveryDates')
             ->willReturnSelf();
 
-        $this->quoteTransferMock->expects($this->atLeastOnce())
+        $this->quoteTransferMock->expects(static::atLeastOnce())
             ->method('setConcreteDeliveryDates')
             ->willReturnSelf();
 
-        $this->assertInstanceOf(
-            QuoteTransfer::class,
+        static::assertEquals(
+            $this->quoteTransferMock,
             $this->conditionalAvailabilityExpander->expand(
                 $this->quoteTransferMock
             )

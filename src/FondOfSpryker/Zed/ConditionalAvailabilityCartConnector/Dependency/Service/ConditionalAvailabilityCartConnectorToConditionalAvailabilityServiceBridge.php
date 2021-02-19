@@ -2,10 +2,11 @@
 
 namespace FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service;
 
+use DateTime;
 use DateTimeInterface;
 use FondOfSpryker\Service\ConditionalAvailability\ConditionalAvailabilityServiceInterface;
 
-class ConditionalAvailabilityCartConnectorToConditionalAvailabilityService implements ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
+class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridge implements ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceInterface
 {
     /**
      * @var \FondOfSpryker\Service\ConditionalAvailability\ConditionalAvailabilityServiceInterface
@@ -26,5 +27,15 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityService imple
     public function generateEarliestDeliveryDate(): DateTimeInterface
     {
         return $this->service->generateEarliestDeliveryDate();
+    }
+
+    /**
+     * @param \DateTime $deliveryDate
+     *
+     * @return \DateTimeInterface
+     */
+    public function generateLatestOrderDateByDeliveryDate(DateTime $deliveryDate): DateTimeInterface
+    {
+        return $this->service->generateLatestOrderDateByDeliveryDate($deliveryDate);
     }
 }

@@ -6,7 +6,7 @@ use Codeception\Test\Unit;
 use DateTime;
 use FondOfSpryker\Service\ConditionalAvailability\ConditionalAvailabilityServiceInterface;
 
-class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest extends Unit
+class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridgeTest extends Unit
 {
     /**
      * @var \PHPUnit\Framework\MockObject\MockObject|\FondOfSpryker\Service\ConditionalAvailability\ConditionalAvailabilityServiceInterface
@@ -14,12 +14,7 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest e
     protected $conditionalAvailabilityServiceMock;
 
     /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\DateTime
-     */
-    protected $dateTimeMock;
-
-    /**
-     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityService
+     * @var \FondOfSpryker\Zed\ConditionalAvailabilityCartConnector\Dependency\Service\ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridge
      */
     protected $conditionalAvailabilityCartConnectorToConditionalAvailabilityService;
 
@@ -32,11 +27,7 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest e
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->dateTimeMock = $this->getMockBuilder(DateTime::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityService = new ConditionalAvailabilityCartConnectorToConditionalAvailabilityService(
+        $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityService = new ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceBridge(
             $this->conditionalAvailabilityServiceMock
         );
     }
@@ -46,13 +37,35 @@ class ConditionalAvailabilityCartConnectorToConditionalAvailabilityServiceTest e
      */
     public function testGenerateEarliestDeliveryDate(): void
     {
+        $earliestDeliveryDate = new DateTime();
+
         $this->conditionalAvailabilityServiceMock->expects(static::atLeastOnce())
             ->method('generateEarliestDeliveryDate')
-            ->willReturn($this->dateTimeMock);
+            ->willReturn($earliestDeliveryDate);
 
         static::assertEquals(
-            $this->dateTimeMock,
+            $earliestDeliveryDate,
             $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityService->generateEarliestDeliveryDate()
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function testGenerateOrderDateByDeliveryDate(): void
+    {
+        $deliveryDate = new DateTime();
+        $lastOrderDate = new DateTime();
+
+        $this->conditionalAvailabilityServiceMock->expects(static::atLeastOnce())
+            ->method('generateLatestOrderDateByDeliveryDate')
+            ->with($deliveryDate)
+            ->willReturn($lastOrderDate);
+
+        static::assertEquals(
+            $lastOrderDate,
+            $this->conditionalAvailabilityCartConnectorToConditionalAvailabilityService
+                ->generateLatestOrderDateByDeliveryDate($deliveryDate)
         );
     }
 }
