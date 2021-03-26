@@ -164,7 +164,7 @@ class ConditionalAvailabilityExpander implements ConditionalAvailabilityExpander
         $latestOrderDate = $this->conditionalAvailabilityService->generateLatestOrderDateByDeliveryDate(
             $concreteDeliveryDate
         );
-
+        
         if (!$groupedConditionalAvailabilities->offsetExists($sku)) {
             return $itemTransfer->addValidationMessage($this->createNotAvailableForGivenDeliveryDateMessage());
         }
