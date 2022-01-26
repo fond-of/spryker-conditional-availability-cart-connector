@@ -25,6 +25,7 @@
     </transfer>
 
     <transfer name="RestCartItem">
+        <property name="sku" type="string"/>
         <property name="deliveryDate" type="string"/>
         <property name="concreteDeliveryDate" type="string"/>
     </transfer>
