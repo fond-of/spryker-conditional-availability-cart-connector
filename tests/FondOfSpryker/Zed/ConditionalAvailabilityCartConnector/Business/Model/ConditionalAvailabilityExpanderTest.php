@@ -180,7 +180,7 @@ class ConditionalAvailabilityExpanderTest extends Unit
 
         $this->startAt = (new DateTime())->format('Y-m-d');
 
-        $this->endAt = (new DateTime())->setDate(2022, 6, 15)->format('Y-m-d');
+        $this->endAt = (new DateTime())->modify('+1 day')->format('Y-m-d');
 
         $this->concreteDeliveryDate = new DateTime();
 
